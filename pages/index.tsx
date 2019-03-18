@@ -1,14 +1,8 @@
-import * as React from 'react'
-import Link from 'next/link'
-import Layout from '../components/Layout'
+import React from 'react'
+import Page from '../components/Page'
 
-const IndexPage: React.FunctionComponent = () => {
-  return (
-    <Layout title="Home | Next.js + TypeScript Example">
-      <h1>Hello Next.js 👋</h1>
-      <p><Link href='/about'><a>About</a></Link></p>
-    </Layout>
-  )
+export default class Counter extends React.Component {
+  render() {
+    return <Page />
+  }
 }
-
-export default IndexPage;
