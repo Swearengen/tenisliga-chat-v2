@@ -9,17 +9,19 @@ router.get('/', async (req, res) => {
 		try {
 			// =============================================================
 			// existing user
-			// dohvatit sve idejve soba usera i poslat ih na klijenta
 			const user = await chatkit.instance.getUser({id: userId})
+			const userRooms = await chatkit.getUserRooms(userId)
+
 			if (user) {
-				app.render(req, res, '/', req.query)
+				app.render(req, res, '/', {...req.query, userRooms})
 			}
 		} catch (error) {
 			if (error.error === 'services/chatkit/not_found/user_not_found') {
 				try {
 					// =============================================================
 					// new user
-					// dodat usera u general sobu i pod channels id vratit general id
+					// dodat usera u general sobu
+					// vratit user rooms di ce bit general soba (treba poziv jer user id-s su tamo)
 					const newUser = await chatkit.createUser(req.query)
 					app.render(req, res, '/', req.query)
 				} catch (error) {

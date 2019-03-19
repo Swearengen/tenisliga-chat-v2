@@ -13,5 +13,10 @@ module.exports = {
             id: userId,
             name: userName,
         })
+    },
+
+    getUserRooms: async function(userId) {
+        return await this.instance.getUserRooms({userId})
+            .then((res) => res)
     }
 }

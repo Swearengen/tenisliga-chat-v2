@@ -9,13 +9,20 @@ export interface RoomUser {
     avatarUrl?: string;
 }
 
-export interface Room {
+export interface SubscribedRoom {
     id: string;
     name?: string;
     isPrivate: boolean;
     customData?: Object;
     userIds?: string[];
     users: Array<any>
+}
+
+export interface UserRoom {
+    id: string;
+    member_user_ids: string[];
+    name: string;
+    private: boolean;
 }
 
 export interface Message {
