@@ -1,5 +1,7 @@
 const Chatkit = require('@pusher/chatkit-server')
 
+const GENERAL_ROOM_ID = '19398846'
+
 module.exports = {
     instance: new Chatkit.default({
         instanceLocator: 'v1:us1:99cebb3b-bac8-4c5c-bcd1-cabf14849b0a',

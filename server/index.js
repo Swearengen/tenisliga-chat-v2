@@ -10,10 +10,12 @@ const handle = app.getRequestHandler()
 
 app.prepare().then(() => {
     const server = express()
-    const routes = require('./routes/index.js')
+    const applicationRoute = require('./routes/index.js')
+    const apiRoute = require('./routes/api.js')
 
     server.use(bodyParser.json())
-    server.use('/', routes)
+    server.use('/', applicationRoute)
+    server.use('/api', apiRoute)
 
     server.get('*', (req, res) => {
         return handle(req, res)
