@@ -2,7 +2,7 @@
   "name": "with-typescript",
   "version": "1.0.0",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "nodemon server/index.js",
     "build": "next build",
     "start": "node server.js",
     "type-check": "tsc"
