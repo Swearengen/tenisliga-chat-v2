@@ -2,7 +2,7 @@
   "name": "with-typescript",
   "version": "1.0.0",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "nodemon server.js",
     "build": "next build",
     "start": "node server.js",
     "type-check": "tsc"
@@ -26,7 +26,6 @@
     "styled-jsx": "^3.2.1",
     "classcat": "^3.2.5",
     "@pusher/chatkit-client": "^1.4.0",
-    "@pusher/chatkit-server": "^1.0.6",
     "autosuggest-highlight": "^3.1.1",
     "react-autosuggest": "^9.4.3"
   },
@@ -38,7 +37,9 @@
     "@babel/plugin-proposal-decorators": "^7.1.0",
     "typescript": "3.2.4",
     "@types/autosuggest-highlight": "^3.1.0",
-    "@types/react-autosuggest": "^9.3.7"
+    "@types/react-autosuggest": "^9.3.7",
+    "@pusher/chatkit-server": "^1.0.6",
+    "nodemon": "^1.12.1"
   },
   "license": "ISC"
 }
