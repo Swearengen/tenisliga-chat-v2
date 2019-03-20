@@ -1,11 +1,11 @@
 import React from 'react'
 import Page from '../src/Components/Page'
-import { UserRoom } from '../store/types';
+import { UserJoinedRoom } from '../store/types';
 
 interface Props {
 	userName: string
 	userId: string
-	userRooms: UserRoom[]
+	userRooms: UserJoinedRoom[]
 }
 
 export default class extends React.Component<Props> {
@@ -16,8 +16,10 @@ export default class extends React.Component<Props> {
 	}
 
   	render() {
-		console.log(this.props.userRooms, 'hhhhh');
-
-    	return <Page userName={this.props.userName} userId={this.props.userId} />
+		return <Page
+			userName={this.props.userName}
+			userId={this.props.userId}
+			userRooms={this.props.userRooms}
+		/>
   	}
 }

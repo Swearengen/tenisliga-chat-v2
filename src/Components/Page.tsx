@@ -2,23 +2,20 @@ import React from 'react'
 import { inject, observer } from 'mobx-react'
 
 import { Store } from '../../store/store'
-import { CurrentUser } from '../../store/types';
+import { UserJoinedRoom } from '../../store/types';
 import Dashboard from './Dashboard'
 
 interface Props {
     userName: string;
     userId: string;
+    userRooms: UserJoinedRoom[]
 }
 
 interface InjectedProps extends Props {
-    currentUser: CurrentUser;
-    setCurrentUser: (userName: string, userId: string) => void
+    store: Store
 }
 
-@inject(({store}: {store: Store}) => ({
-    currentUser: store.currentUser,
-    setCurrentUser: store.setCurrentUser
-}))
+@inject('store')
 @observer
 class Page extends React.Component<Props> {
 
@@ -26,15 +23,15 @@ class Page extends React.Component<Props> {
         return this.props as InjectedProps;
     }
     componentDidMount() {
-        this.injected.setCurrentUser(this.props.userName, this.props.userId)
+        this.injected.store.setUserJoinedRoom(this.props.userRooms)
     }
 
     render() {
-        const { currentUser } = this.injected
+        const { store } = this.injected
 
         return (
             <div>
-                <Dashboard currentUser={currentUser} />
+                <Dashboard store={store} userId={this.props.userId} />
             </div>
         )
     }

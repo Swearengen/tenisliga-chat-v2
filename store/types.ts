@@ -18,7 +18,7 @@ export interface SubscribedRoom {
     users: Array<any>
 }
 
-export interface UserRoom {
+export interface UserJoinedRoom {
     id: string;
     member_user_ids: string[];
     name: string;

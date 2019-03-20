@@ -25,5 +25,9 @@ module.exports = {
             roomId: GENERAL_ROOM_ID,
             userIds: [userId]
         })
+    },
+
+    authenticate: async function (userId) {
+        return await this.instance.authenticate({userId})
     }
 }

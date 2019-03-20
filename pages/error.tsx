@@ -1,5 +1,5 @@
 import React from 'react'
-import { ErrorPage } from '../src/UtilComponents/ErrorPage'
+import { ErrorPage } from '../src/Components/UtilComponents/ErrorPage'
 
 interface Props {
 	errorMessage: string
