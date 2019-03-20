@@ -25,6 +25,8 @@ export class Store {
     @action
     public connectUserRequest = (userId: string) => {
         this.loading = true
+        console.log(process.env.TEST, 'env');
+
         const chatManager = new Chatkit.ChatManager({
             instanceLocator: 'v1:us1:99cebb3b-bac8-4c5c-bcd1-cabf14849b0a',
             userId,

@@ -1,4 +1,9 @@
 const Chatkit = require('@pusher/chatkit-server')
+const path = require('path')
+const prod = process.env.NODE_ENV === 'production'
+const dotenv = require('dotenv').config({
+    path: path.join(__dirname, `../environment/.env.${prod ? 'prod' : 'dev'}`)
+})
 
 const GENERAL_ROOM_ID = '19398846'
 
@@ -16,6 +21,8 @@ module.exports = {
     },
 
     getUserRooms: async function(userId) {
+        console.log(process.env.TEST, 'env');
+
         return await this.instance.getUserRooms({userId})
             .then((res) => res)
     },
