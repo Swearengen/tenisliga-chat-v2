@@ -18,5 +18,12 @@ module.exports = {
     getUserRooms: async function(userId) {
         return await this.instance.getUserRooms({userId})
             .then((res) => res)
+    },
+
+    addUserToGeneralRoom: async function(userId) {
+        return await this.instance.addUsersToRoom({
+            roomId: GENERAL_ROOM_ID,
+            userIds: [userId]
+        })
     }
 }

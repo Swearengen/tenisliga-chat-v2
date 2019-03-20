@@ -20,11 +20,14 @@ router.get('/', async (req, res) => {
 				try {
 					// =============================================================
 					// new user
-					// dodat usera u general sobu
-					// vratit user rooms di ce bit general soba (treba poziv jer user id-s su tamo)
 					const newUser = await chatkit.createUser(req.query)
-					app.render(req, res, '/', req.query)
+					await chatkit.addUserToGeneralRoom(userId)
+					const userRooms = await chatkit.getUserRooms(userId)
+
+					app.render(req, res, '/', {...req.query, userRooms})
 				} catch (error) {
+					console.log(error, 'error');
+
 					app.render(req, res, '/error', {
 						errorMessage: error.error_description || 'Server Error'
 					})
