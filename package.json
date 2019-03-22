@@ -5,6 +5,7 @@
     "build": "next build",
     "dev": "nodemon server/index.js",
     "start:prod": "NODE_ENV=production node server/index.js",
+    "deploy": "SLS_DEBUG=* next build && sls deploy",
     "type-check": "tsc"
   },
   "dependencies": {
@@ -30,7 +31,9 @@
     "react-autosuggest": "^9.4.3",
     "react-dom": "^16.8.4",
     "react-jss": "^8.1.0",
-    "styled-jsx": "^3.2.1"
+    "styled-jsx": "^3.2.1",
+    "serverless-apigw-binary": "^0.4.4",
+    "serverless-http": "^1.6.0"
   },
   "devDependencies": {
     "@types/next": "^7.0.6",
