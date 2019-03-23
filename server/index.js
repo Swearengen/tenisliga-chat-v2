@@ -5,11 +5,11 @@ const next = require('next')
 
 const port = parseInt(process.env.PORT, 10) || 3000
 const dev = process.env.NODE_ENV !== 'production'
-const app = next({dev})
+const app = (module.exports = next({dev}))
 const handle = app.getRequestHandler()
-const server = express()
 
 app.prepare().then(() => {
+    const server = express()
     const applicationRoute = require('./routes/index.js')
     const apiRoute = require('./routes/api.js')
 
@@ -26,8 +26,3 @@ app.prepare().then(() => {
         console.log(`> Ready on http://localhost:${port}`)
     })
 })
-
-module.exports = {
-    server,
-    app
-}
