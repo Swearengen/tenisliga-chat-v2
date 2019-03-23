@@ -1,7 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const next = require('next')
-const path = require('path')
 // const Chatkit = require('@pusher/chatkit-server')
 
 const port = parseInt(process.env.PORT, 10) || 3000
@@ -14,10 +13,7 @@ app.prepare().then(() => {
     const applicationRoute = require('./routes/index.js')
     const apiRoute = require('./routes/api.js')
 
-    if (!dev) {
-        server.use('/_next', express.static(path.join(__dirname, '.next')))
-    }
-    // server.use(bodyParser.json())
+    server.use(bodyParser.json())
     server.use('/', applicationRoute)
     server.use('/api', apiRoute)
 
@@ -25,12 +21,10 @@ app.prepare().then(() => {
         return handle(req, res)
     })
 
-    if (dev) {
-        server.listen(port, err => {
-            if (err) throw err
-            console.log(`> Ready on http://localhost:${port}`)
-        })
-    }
+    server.listen(port, err => {
+        if (err) throw err
+        console.log(`> Ready on http://localhost:${port}`)
+    })
 })
 
 module.exports = {
