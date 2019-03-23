@@ -32,7 +32,7 @@ class MyMobxApp extends App {
 		const isServer = !process.browser;
 		this.mobxStore = isServer
 			? props.initialMobxState
-			: initializeStore(props.initialMobxState)
+			: initializeStore()
 		this.pageContext = getPageContext();
 	}
 

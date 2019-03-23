@@ -16,6 +16,7 @@ app.prepare().then(() => {
 
     if (!dev) {
         server.use('/_next', express.static(path.join(__dirname, '.next')))
+        server.use('/static', express.static('static'))
     }
     // server.use(bodyParser.json())
     server.use('/', applicationRoute)
@@ -25,12 +26,11 @@ app.prepare().then(() => {
         return handle(req, res)
     })
 
-    if (dev) {
-        server.listen(port, err => {
-            if (err) throw err
-            console.log(`> Ready on http://localhost:${port}`)
-        })
-    }
+
+    server.listen(port, err => {
+        if (err) throw err
+        console.log(`> Ready on http://localhost:${port}`)
+    })
 })
 
 module.exports = {
