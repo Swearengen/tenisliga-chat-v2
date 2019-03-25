@@ -1,0 +1,32 @@
+service: tenisliga-chat-v2
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${self:custom.secrets.NODE_ENV}
+  region: us-east-1
+  environment:
+    NODE_ENV: ${self:custom.secrets.NODE_ENV}
+
+functions:
+  server:
+    handler: index.server
+    events:
+      - http: ANY /
+      - http: ANY /{proxy+}
+
+  chatkitAuth:
+    handler: serverless/chatkitRoutes.authenticate
+    events:
+      - http:
+          path: api/authenticate
+          method: post
+
+plugins:
+  - serverless-apigw-binary
+
+custom:
+  secrets: ${file(secrets.json)}
+  apigwBinary:
+    types:
+      - '*/*'
