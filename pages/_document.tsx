@@ -50,6 +50,7 @@ class MyDocument extends Document<Props> {
       <html lang="en" dir="ltr">
         <Head>
           <meta charSet="utf-8" />
+          <meta name="robots" content="noindex" />
           {/* Use minimum-scale=1 to enable GPU rasterization */}
           <meta
             name="viewport"

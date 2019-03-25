@@ -8,6 +8,9 @@ import { UserJoinedRoom, SubscribedRoom, Message, RoomUser } from './types';
 const isServer = !process.browser
 useStaticRendering(isServer)
 
+const API_URL = process.env.API_URL
+const CHATKIT_INSTANCE_LOCATOR = process.env.CHATKIT_INSTANCE_LOCATOR
+
 export class Store {
     @observable userJoinedRooms?: UserJoinedRoom[]
     @observable loading: boolean = true;
@@ -25,14 +28,14 @@ export class Store {
     @action
     public connectUserRequest = (userId: string) => {
         this.loading = true
-        console.log(process.env.TEST, 'env');
+
+        console.log(process.env.NODE_ENV, 'ggg');
+        let url = process.env.NODE_ENV === 'production' ? '/api/authenticate' : `${API_URL}/api/authenticate`
 
         const chatManager = new Chatkit.ChatManager({
-            instanceLocator: 'v1:us1:99cebb3b-bac8-4c5c-bcd1-cabf14849b0a',
+            instanceLocator: CHATKIT_INSTANCE_LOCATOR,
             userId,
-            tokenProvider: new Chatkit.TokenProvider({
-                url: 'http://localhost:3000/api/authenticate',
-            }),
+            tokenProvider: new Chatkit.TokenProvider({url})
         })
 
         chatManager

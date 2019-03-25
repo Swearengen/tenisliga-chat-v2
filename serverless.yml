@@ -1,4 +1,4 @@
-service: tenisliga-chat
+service: tenisliga-chat-v2
 
 provider:
   name: aws
@@ -15,19 +15,18 @@ functions:
       - http: ANY /
       - http: ANY /{proxy+}
 
+  chatkitAuth:
+    handler: serverless/chatkitRoutes.authenticate
+    events:
+      - http:
+          path: api/authenticate
+          method: post
+
 plugins:
   - serverless-apigw-binary
-  # - serverless-domain-manager
 
 custom:
   secrets: ${file(secrets.json)}
   apigwBinary:
     types:
       - '*/*'
-  # customDomain:
-  #   domainName: ${self:custom.secrets.DOMAIN}
-  #   basePath: ''
-  #   stage: ${self:custom.secrets.NODE_ENV}
-  #   createRoute53Record: true
-    # endpointType: 'regional'
-    # if the ACM certificate is created in a region except for `'us-east-1'` you need `endpointType: 'regional'`
