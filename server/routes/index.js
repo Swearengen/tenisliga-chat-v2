@@ -16,11 +16,13 @@ router.get('/', async (req, res) => {
 				app.render(req, res, '/', {...req.query, userRooms})
 			}
 		} catch (error) {
+
 			if (error.error === 'services/chatkit/not_found/user_not_found') {
 				try {
 					// =============================================================
 					// new user
 					const newUser = await chatkit.createUser(req.query)
+
 					await chatkit.addUserToGeneralRoom(userId)
 					const userRooms = await chatkit.getUserRooms(userId)
 

@@ -27,7 +27,10 @@ const scrollToEndStyles = {
 }
 
 interface Props {
+    ref: any
     children: ReactNode
+    scrollToBottomNumber: number
+    initailyMessagesScrolled: boolean
 }
 
 interface State {
@@ -40,12 +43,8 @@ class ScrollableCont extends React.Component<Props, State> {
     constructor(props: Props) {
 		super(props)
 		this.state = {
-			messagesScrolled: false,
+            messagesScrolled: props.initailyMessagesScrolled
 		}
-    }
-
-    getAlert() {
-        alert('getAlert from Child');
     }
 
     componentWillUnmount() {
@@ -56,21 +55,13 @@ class ScrollableCont extends React.Component<Props, State> {
 
     messagesContDidMount = (node: any) => {
         this.messagesCont = node
-        const { height } = this.messagesCont.getBoundingClientRect()
-        const scrollHeight = this.messagesCont.scrollHeight
-
-        console.log(scrollHeight, height, 'ffff');
-        if (scrollHeight === height) {
-            this.setState({messagesScrolled: true})
-        } else {
-            this.scrollToBottom()
-        }
         this.messagesCont.addEventListener("scroll", this.handleScroll)
     }
 
     handleScroll = _.debounce((event: any) => {
-        const { scrollTop, offsetHeight, scrollHeight } = event.srcElement
-        if (scrollTop + offsetHeight === scrollHeight) {
+        const { scrollTop, offsetHeight } = event.srcElement
+
+        if (scrollTop + offsetHeight - 194 === this.props.scrollToBottomNumber) {
             this.setState({ messagesScrolled: true })
         } else {
             this.setState({ messagesScrolled: false })
@@ -79,10 +70,8 @@ class ScrollableCont extends React.Component<Props, State> {
 
     messagesCont: any = React.createRef()
 
-    scrollToBottom = () => {
-        console.log(this.messagesCont.clientHeight);
-
-        this.messagesCont.scroll({top: this.messagesCont.clientHeight})
+    scrollToBottom = (scrollToNumber?: number) => {
+        this.messagesCont.scroll({top: scrollToNumber ? scrollToNumber : this.props.scrollToBottomNumber})
     }
 
     render () {
@@ -91,7 +80,7 @@ class ScrollableCont extends React.Component<Props, State> {
                 {this.props.children}
 
                 {!this.state.messagesScrolled &&
-                    <div style={scrollToEndStyles} onClick={this.scrollToBottom}>
+                    <div style={scrollToEndStyles} onClick={(e: any) => this.scrollToBottom()}>
                         <KeyboardArrowDown />
                     </div>
                 }

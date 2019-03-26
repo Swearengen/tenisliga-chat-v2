@@ -12,6 +12,7 @@ const API_URL = process.env.API_URL
 const CHATKIT_INSTANCE_LOCATOR = process.env.CHATKIT_INSTANCE_LOCATOR
 
 export class Store {
+    @observable errorMessage?: string
     @observable userJoinedRooms?: UserJoinedRoom[]
     @observable loading: boolean = true;
     @observable chatkitUser: any = {}
@@ -37,63 +38,67 @@ export class Store {
             tokenProvider: new Chatkit.TokenProvider({url})
         })
 
+
         chatManager
-            .connect()
-            .then((currentUser: any) => {
-                this.chatkitUser = currentUser
+        .connect()
+        .then((currentUser: any) => {
+            this.chatkitUser = currentUser
 
-                // 1. popis idejava svih soba treba dohvatit na serveru, metoda je getUserRooms
-                    // proc kroz popis i u channels dodat sve sobe koje su public i koji su sobe od svake lige (customData neki)
-                    // ostale su znaci privatne poruke
+            // 1. popis idejava svih soba treba dohvatit na serveru, metoda je getUserRooms
+                // proc kroz popis i u channels dodat sve sobe koje su public i koji su sobe od svake lige (customData neki)
+                // ostale su znaci privatne poruke
 
-                // 2. postavit na pocetku da je currentRoom general soba
+            // 2. postavit na pocetku da je currentRoom general soba
 
-                // 3. tu se subscrijba i dodaje u general sobu
-                    // trebalo bi tu subscrijabat na sve sobe
-                    // u onMessage hook metodi odoavat message u store po id-ju
-                    // u started i stoped typing metodama zapisivat u store samo ako je trenutni id jednak currentRoom id-ju
+            // 3. tu se subscrijba i dodaje u general sobu
+                // trebalo bi tu subscrijabat na sve sobe
+                // u onMessage hook metodi odoavat message u store po id-ju
+                // u started i stoped typing metodama zapisivat u store samo ako je trenutni id jednak currentRoom id-ju
 
-                // 4. kad netko zeli promjenit sobu klikajuci po kanalima
-                // samo mjenjam currentRoom i u metodi getCurrentMessages (nova metoda) vracam trenutne poruke
+            // 4. kad netko zeli promjenit sobu klikajuci po kanalima
+            // samo mjenjam currentRoom i u metodi getCurrentMessages (nova metoda) vracam trenutne poruke
 
-                // 5. kad dodam search za usere, odabirom iz dropdowna provjeravam dal postoji private soba sa tim userom
-                    // ako postoji uzmem id te sobe i postavljam je kao currentRomm
-                    // ako ne postoji kreiram novu sobu i postavljam je kao currentRoom
+            // 5. kad dodam search za usere, odabirom iz dropdowna provjeravam dal postoji private soba sa tim userom
+                // ako postoji uzmem id te sobe i postavljam je kao currentRomm
+                // ako ne postoji kreiram novu sobu i postavljam je kao currentRoom
 
-                this.chatkitUser.subscribeToRoomMultipart({
-                    roomId: "19401223",
-                    messageLimit: 100,
-                    hooks: {
-                        onMessage: (message: Message) => {
-                            this.messages = this.messages ? [...this.messages, message] : [message]
-                        },
-                        onUserStartedTyping: (user: RoomUser) => {
-                            this.usersWhoAreTyping = [...this.usersWhoAreTyping, user.name]
-                        },
-                        onUserStoppedTyping: (user: RoomUser) => {
-                            this.usersWhoAreTyping = this.usersWhoAreTyping.filter(
-                                username => username !== user.name
-                            )
-                        }
+            this.chatkitUser.subscribeToRoom({
+                roomId: "19401390",
+                messageLimit: 100,
+                hooks: {
+                    onMessage: (message: Message) => {
+                        this.messages = this.messages ? [...this.messages, message] : [message]
                     },
-                })
-                .then((currentRoom: SubscribedRoom) => {
-                    this.loading = false
-
-                    this.currentRoom = currentRoom
-                    _.forEach(currentUser.users, (value) => {
-                        let roomUser = value
-                        this.roomUsers = this.roomUsers ? [...this.roomUsers, roomUser] : [roomUser]
-                    });
-
-
-                })
+                    onUserStartedTyping: (user: RoomUser) => {
+                        this.usersWhoAreTyping = [...this.usersWhoAreTyping, user.name]
+                    },
+                    onUserStoppedTyping: (user: RoomUser) => {
+                        this.usersWhoAreTyping = this.usersWhoAreTyping.filter(
+                            username => username !== user.name
+                        )
+                    }
+                },
             })
-            .catch((error: any) => {
+            .then((currentRoom: SubscribedRoom) => {
                 this.loading = false
-                // handle error here
-                console.error('error', error)
+
+                this.currentRoom = currentRoom
+                _.forEach(currentUser.users, (value) => {
+                    let roomUser = value
+                    this.roomUsers = this.roomUsers ? [...this.roomUsers, roomUser] : [roomUser]
+                });
             })
+            .catch((err: any) => {
+                console.log(err);
+                this.loading = false
+                this.errorMessage = err.info ? err.info.error_description : 'Server error'
+            })
+        })
+        .catch((error: any) => {
+            console.error(error)
+            this.loading = false
+            this.errorMessage = error.info ? error.info.error_description : 'Server error'
+        })
     }
 
     public sendUserTypingEvent = () => {

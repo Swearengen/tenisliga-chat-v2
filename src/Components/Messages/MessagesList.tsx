@@ -13,12 +13,31 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import teal from '@material-ui/core/colors/teal';
-
+import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
+import grey from '@material-ui/core/colors/grey'
 
 import { formatMessageDate } from '../../utils'
-import ScrollableCont from './ScrollableCont';
+// import ScrollableCont from './ScrollableCont';
 
 const styles = (theme: any) => ({
+    rootStyles: {
+        position: 'absolute' as 'absolute',
+        height: '100%',
+        overflowX: 'hidden' as 'hidden',
+        overflowY: 'scroll' as 'scroll',
+        left: '0',
+        right: '0',
+        paddingBottom: '190px',
+    },
+    scrollToEndStyles: {
+        position: 'fixed' as 'fixed',
+        background: grey[300],
+        bottom: '150px',
+        right: '20px',
+        padding: '3px',
+        borderRadius: '50%',
+        cursor: 'pointer'
+    },
     messageText: {
         backgroundColor: teal[100],
         borderRadius: '25px',
@@ -50,13 +69,26 @@ class MessagesList extends React.Component<Props, {}> {
         this.child = React.createRef();
     }
 
-    componentDidUpdate(prevProps: Props) {
-        console.log(this.child.current);
+    // componentDidMount () {
+    //     const number = this.scrollToBottom!.getBoundingClientRect().top
+    //     this.child.current.scrollToBottom(number)
+    // }
 
-        if (prevProps.messages.length < this.props.messages.length) {
-            this.child.current.scrollToBottom()
-        }
-    }
+    // componentDidUpdate(prevProps: Props) {
+    //     if (prevProps.messages.length < this.props.messages.length) {
+    //         const number = this.scrollToBottom!.getBoundingClientRect().top
+    //         this.child.current.scrollToBottom(number)
+    //     }
+    // }
+
+    // mountLastElementToScroll = (node: any) => {
+    //     if (node) {
+    //         console.log(node);
+
+    //         console.log(node.getBoundingClientRect().top);
+    //         this.scrollToBottom = node
+    //     }
+    // }
 
     getSenderName = (senderId: string) => {
         let sender = _.find(this.props.roomUsers, {id: senderId}) as RoomUser
@@ -64,6 +96,9 @@ class MessagesList extends React.Component<Props, {}> {
     }
 
     renderOtherUserMessage = (message: Message) => {
+        if (!message.text) {
+            return
+        }
         return (
             <ListItem key={message.id} alignItems="flex-start">
                 <ListItemAvatar>
@@ -77,7 +112,7 @@ class MessagesList extends React.Component<Props, {}> {
                     }
                     secondary={
                         <Typography variant="body2" className={this.props.classes.messageText}>
-                            {message.parts[0].payload.content}
+                            {message.text}
                         </Typography>
                     }
                 />
@@ -87,6 +122,10 @@ class MessagesList extends React.Component<Props, {}> {
 
     renderOwnMessages = (message: Message) => {
         const { classes } = this.props
+
+        if (!message.text) {
+            return
+        }
         return (
             <ListItem key={message.id} style={{justifyContent: 'flex-end'}}>
                 <ListItemText className={classes.listText}
@@ -97,7 +136,7 @@ class MessagesList extends React.Component<Props, {}> {
                     }
                     secondary={
                         <Typography variant="body2" className={cc([classes.messageText, classes.own])}>
-                            {message.parts[0].payload.content}
+                            {message.text}
                         </Typography>
                     }
                 />
@@ -105,359 +144,34 @@ class MessagesList extends React.Component<Props, {}> {
         )
     }
 
+    scrollToBottom = () => {
+        console.log('scroll');
+
+    }
+
     render () {
         return (
-            <ScrollableCont ref={this.child}>
+            <div className={this.props.classes.rootStyles}>
                 <Grid container justify = "center">
                     <Grid item xs={10}>
                         <List>
-                            {this.props.messages.map((message) => (
-                                message.senderId === this.props.userId ? (
-                                    this.renderOwnMessages(message)
-                                ) : (
-                                    this.renderOtherUserMessage(message)
+                            {this.props.messages.map((message) => {
+                                return (
+                                    message.senderId === this.props.userId ? (
+                                        this.renderOwnMessages(message)
+                                    ) : (
+                                        this.renderOtherUserMessage(message)
+                                    )
                                 )
-                            ))}
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            fsfsd
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            fsdfsd
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            1
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            1
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            1
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            1
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            <ListItem style={{justifyContent: 'flex-end'}}>
-                                <ListItemText className={this.props.classes.listText}
-                                    primary={
-                                        <Typography component="div" variant="caption">
-                                            2
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography variant="body2" className={cc([this.props.classes.messageText, this.props.classes.own])}>
-                                            2
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
+                            })}
                         </List>
                     </Grid>
                 </Grid>
-            </ScrollableCont>
+
+                <div className={this.props.classes.scrollToEndStyles} onClick={(e: any) => this.scrollToBottom()}>
+                    <KeyboardArrowDown />
+                </div>
+            </div>
         )
     }
 }
