@@ -2,32 +2,31 @@ import * as React from 'react'
 import { ReactNode } from 'react'
 
 import * as _ from 'lodash'
-import { withStyles, WithStyles } from '@material-ui/core/styles'
 import grey from '@material-ui/core/colors/grey'
 
 import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 
-const styles = (theme: any) => ({
-    root: {
-        position: 'absolute' as 'absolute',
-        height: '100%',
-        overflow: 'scroll',
-        left: '0',
-        right: '0',
-        paddingBottom: '190px',
-    },
-    scrollToEnd: {
-        position: 'fixed' as 'fixed',
-        background: grey[300],
-        bottom: '150px',
-        right: '20px',
-        padding: '3px',
-        borderRadius: '50%',
-        cursor: 'pointer'
-    }
-})
+const rootStyles = {
+    position: 'absolute' as 'absolute',
+    height: '100%',
+    overflowX: 'hidden' as 'hidden',
+    overflowY: 'scroll' as 'scroll',
+    left: '0',
+    right: '0',
+    paddingBottom: '190px',
+}
 
-interface Props extends WithStyles<typeof styles> {
+const scrollToEndStyles = {
+    position: 'fixed' as 'fixed',
+    background: grey[300],
+    bottom: '150px',
+    right: '20px',
+    padding: '3px',
+    borderRadius: '50%',
+    cursor: 'pointer'
+}
+
+interface Props {
     children: ReactNode
 }
 
@@ -45,6 +44,10 @@ class ScrollableCont extends React.Component<Props, State> {
 		}
     }
 
+    getAlert() {
+        alert('getAlert from Child');
+    }
+
     componentWillUnmount() {
         if (this.messagesCont) {
             this.messagesCont.removeEventListener('scroll', this.handleScroll);
@@ -53,10 +56,14 @@ class ScrollableCont extends React.Component<Props, State> {
 
     messagesContDidMount = (node: any) => {
         this.messagesCont = node
-        const { height } = node.getBoundingClientRect()
-        const scrollHeight = node.scrollHeight
+        const { height } = this.messagesCont.getBoundingClientRect()
+        const scrollHeight = this.messagesCont.scrollHeight
+
+        console.log(scrollHeight, height, 'ffff');
         if (scrollHeight === height) {
             this.setState({messagesScrolled: true})
+        } else {
+            this.scrollToBottom()
         }
         this.messagesCont.addEventListener("scroll", this.handleScroll)
     }
@@ -73,16 +80,18 @@ class ScrollableCont extends React.Component<Props, State> {
     messagesCont: any = React.createRef()
 
     scrollToBottom = () => {
+        console.log(this.messagesCont.clientHeight);
+
         this.messagesCont.scroll({top: this.messagesCont.clientHeight})
     }
 
     render () {
         return(
-            <div className={this.props.classes.root} ref={this.messagesContDidMount}>
+            <div style={rootStyles} ref={this.messagesContDidMount}>
                 {this.props.children}
 
                 {!this.state.messagesScrolled &&
-                    <div className={this.props.classes.scrollToEnd} onClick={this.scrollToBottom}>
+                    <div style={scrollToEndStyles} onClick={this.scrollToBottom}>
                         <KeyboardArrowDown />
                     </div>
                 }
@@ -91,4 +100,4 @@ class ScrollableCont extends React.Component<Props, State> {
     }
 }
 
-export default withStyles(styles)(ScrollableCont)
+export default ScrollableCont

@@ -29,7 +29,6 @@ export class Store {
     public connectUserRequest = (userId: string) => {
         this.loading = true
 
-        console.log(process.env.NODE_ENV, 'ggg');
         let url = process.env.NODE_ENV === 'production' ? '/api/authenticate' : `${API_URL}/api/authenticate`
 
         const chatManager = new Chatkit.ChatManager({
@@ -62,7 +61,7 @@ export class Store {
                     // ako ne postoji kreiram novu sobu i postavljam je kao currentRoom
 
                 this.chatkitUser.subscribeToRoomMultipart({
-                    roomId: "19398846",
+                    roomId: "19401223",
                     messageLimit: 100,
                     hooks: {
                         onMessage: (message: Message) => {
