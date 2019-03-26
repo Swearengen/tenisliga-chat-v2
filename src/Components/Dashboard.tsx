@@ -112,6 +112,7 @@ class Dashboard extends React.Component<Props, State> {
 								messages={store.messages!}
 								roomUsers={store.roomUsers!}
 								userId={this.props.userId}
+								lastMessageId={store.getLastMessageId}
                             />
 						</div>
 					}

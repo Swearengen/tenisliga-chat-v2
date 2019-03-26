@@ -1,23 +1,17 @@
 import React from 'react'
 import * as _ from 'lodash'
-import cc from 'classcat'
+
+import {Events, Element, animateScroll as scroll, scroller } from 'react-scroll'
 
 import { Message, RoomUser } from '../../../store/types'
 
 import { Grid } from '@material-ui/core';
 import { withStyles, WithStyles } from '@material-ui/core/styles'
 import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import Avatar from '@material-ui/core/Avatar';
-import Typography from '@material-ui/core/Typography';
-import teal from '@material-ui/core/colors/teal';
 import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import grey from '@material-ui/core/colors/grey'
 
-import { formatMessageDate } from '../../utils'
-// import ScrollableCont from './ScrollableCont';
+import MessageItem from './MessageItem';
 
 const styles = (theme: any) => ({
     rootStyles: {
@@ -37,140 +31,78 @@ const styles = (theme: any) => ({
         padding: '3px',
         borderRadius: '50%',
         cursor: 'pointer'
-    },
-    messageText: {
-        backgroundColor: teal[100],
-        borderRadius: '25px',
-        maxWidth: '320px',
-        padding: '5px 10px',
-        display: 'inline-block',
-        '&$own': {
-            backgroundColor: teal[300],
-        },
-    },
-    own: {},
-    listText: {
-        flex: '0 0 auto'
-    },
+    }
 });
 
 interface Props extends WithStyles<typeof styles> {
     messages: Message[];
+    lastMessageId?: string;
     roomUsers: RoomUser[];
     userId: string;
 }
 
 class MessagesList extends React.Component<Props, {}> {
 
-    child: any
-
-    constructor(props: Props) {
-        super(props);
-        this.child = React.createRef();
-    }
-
-    // componentDidMount () {
-    //     const number = this.scrollToBottom!.getBoundingClientRect().top
-    //     this.child.current.scrollToBottom(number)
-    // }
-
-    // componentDidUpdate(prevProps: Props) {
-    //     if (prevProps.messages.length < this.props.messages.length) {
-    //         const number = this.scrollToBottom!.getBoundingClientRect().top
-    //         this.child.current.scrollToBottom(number)
-    //     }
-    // }
-
-    // mountLastElementToScroll = (node: any) => {
-    //     if (node) {
-    //         console.log(node);
-
-    //         console.log(node.getBoundingClientRect().top);
-    //         this.scrollToBottom = node
-    //     }
-    // }
-
-    getSenderName = (senderId: string) => {
-        let sender = _.find(this.props.roomUsers, {id: senderId}) as RoomUser
-        return sender ? sender.name : ''
-    }
-
-    renderOtherUserMessage = (message: Message) => {
-        if (!message.text) {
-            return
+    componentDidUpdate(prevProps: Props) {
+        if (this.props.messages.length > prevProps.messages.length) {
+            this.scrollToElement(this.props.lastMessageId!)
         }
-        return (
-            <ListItem key={message.id} alignItems="flex-start">
-                <ListItemAvatar>
-                    <Avatar alt="Remy Sharp" src='/static/avatarPlaceholder.png' />
-                </ListItemAvatar>
-                <ListItemText className={this.props.classes.listText}
-                    primary={
-                        <Typography component="div" variant="caption">
-                            <strong>{this.getSenderName(message.senderId)}</strong>: {formatMessageDate(message.createdAt)}
-                        </Typography>
-                    }
-                    secondary={
-                        <Typography variant="body2" className={this.props.classes.messageText}>
-                            {message.text}
-                        </Typography>
-                    }
-                />
-            </ListItem>
-        )
     }
 
-    renderOwnMessages = (message: Message) => {
-        const { classes } = this.props
+    scrollToElement(messageId: string) {
 
-        if (!message.text) {
-            return
-        }
-        return (
-            <ListItem key={message.id} style={{justifyContent: 'flex-end'}}>
-                <ListItemText className={classes.listText}
-                    primary={
-                        <Typography component="div" variant="caption">
-                            {formatMessageDate(message.createdAt)}
-                        </Typography>
-                    }
-                    secondary={
-                        <Typography variant="body2" className={cc([classes.messageText, classes.own])}>
-                            {message.text}
-                        </Typography>
-                    }
-                />
-            </ListItem>
-        )
+        let goToContainer = new Promise((resolve, reject) => {
+
+          Events.scrollEvent.register('end', () => {
+            resolve();
+            Events.scrollEvent.remove('end');
+          });
+
+          scroller.scrollTo('scroll-container', {
+            duration: 100,
+            delay: 0,
+          });
+
+        });
+
+        goToContainer.then(() =>
+          scroller.scrollTo(messageId, {
+            duration: 800,
+            delay: 0,
+            smooth: 'easeInOutQuart',
+            containerId: 'scroll-container'
+          }));
     }
 
-    scrollToBottom = () => {
-        console.log('scroll');
-
-    }
+    renderMessage = (message: Message) => (
+        <Element key={message.id} name={String(message.id)}>
+            <MessageItem
+                message={message}
+                userId={this.props.userId}
+                roomUsers={this.props.roomUsers}
+            />
+        </Element>
+    )
 
     render () {
         return (
-            <div className={this.props.classes.rootStyles}>
+            <div className={this.props.classes.rootStyles} id="scroll-container">
                 <Grid container justify = "center">
                     <Grid item xs={10}>
                         <List>
-                            {this.props.messages.map((message) => {
-                                return (
-                                    message.senderId === this.props.userId ? (
-                                        this.renderOwnMessages(message)
-                                    ) : (
-                                        this.renderOtherUserMessage(message)
-                                    )
-                                )
-                            })}
+                            {this.props.messages.map((message) => this.renderMessage(message))}
                         </List>
                     </Grid>
                 </Grid>
 
-                <div className={this.props.classes.scrollToEndStyles} onClick={(e: any) => this.scrollToBottom()}>
-                    <KeyboardArrowDown />
-                </div>
+                {this.props.lastMessageId &&
+                    <div
+                        className={this.props.classes.scrollToEndStyles}
+                        onClick={(e: any) => this.scrollToElement(this.props.lastMessageId!)}
+                    >
+                        <KeyboardArrowDown />
+                    </div>
+                }
             </div>
         )
     }

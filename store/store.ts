@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx'
+import { action, observable, computed } from 'mobx'
 import { useStaticRendering } from 'mobx-react'
 const Chatkit = require('@pusher/chatkit-client'); // todo: why import is not working
 import * as _ from 'lodash'
@@ -119,6 +119,15 @@ export class Store {
     }
 
     public connectUser = _.once(this.connectUserRequest)
+
+    @computed
+    get getLastMessageId() {
+        const lastMessage = _.last(this.messages)
+        if (lastMessage) {
+            return String(lastMessage.id)
+        }
+        return undefined
+    }
 }
 
 export function initializeStore() {
