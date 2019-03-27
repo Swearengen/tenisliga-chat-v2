@@ -5,7 +5,7 @@ const dotenv = require('dotenv').config({
     path: path.join(__dirname, `../environment/.env.${prod ? 'prod' : 'dev'}`)
 })
 
-const GENERAL_ROOM_ID = '19401390'
+const GENERAL_ROOM_ID = '19401814'
 
 module.exports = {
     instance: new Chatkit.default({
