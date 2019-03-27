@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const app = require('../index')
+const nextApp = require('../index')
 const chatkit = require('../chatkit')
 
 router.get('/', async (req, res) => {
@@ -13,35 +13,33 @@ router.get('/', async (req, res) => {
 			const userRooms = await chatkit.getUserRooms(userId)
 
 			if (user) {
-				app.render(req, res, '/', {...req.query, userRooms})
+				nextApp.app.render(req, res, '/', {...req.query, userRooms})
 			}
 		} catch (error) {
-
 			if (error.error === 'services/chatkit/not_found/user_not_found') {
 				try {
 					// =============================================================
 					// new user
 					const newUser = await chatkit.createUser(req.query)
-
 					await chatkit.addUserToGeneralRoom(userId)
 					const userRooms = await chatkit.getUserRooms(userId)
 
-					app.render(req, res, '/', {...req.query, userRooms})
+					nextApp.app.render(req, res, '/', {...req.query, userRooms})
 				} catch (error) {
 					console.log(error, 'error');
 
-					app.render(req, res, '/error', {
+					nextApp.app.render(req, res, '/error', {
 						errorMessage: error.error_description || 'Server Error'
 					})
 				}
 			} else {
-				app.render(req, res, '/error', {
+				nextApp.app.render(req, res, '/error', {
 					errorMessage: error.error_description || 'Server Error'
 				})
 			}
 		}
 	} else {
-		app.render(req, res, '/error', {
+		nextApp.app.render(req, res, '/error', {
 			errorMessage: "Please provide userName and userId"
 		})
 	}
