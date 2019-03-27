@@ -32,6 +32,7 @@ export interface Message {
     parts: Part[];
     createdAt: string;
     updatedAt: string;
+    text?: string;
 }
 
 export enum PartType {

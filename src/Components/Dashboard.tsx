@@ -11,6 +11,7 @@ import Sidebar from './Sidebar';
 import MessagesList from './Messages/MessagesList';
 import MessageForm from './Messages/MessageForm';
 import TypingIndicator from './Messages/TypingIndicator';
+import { ErrorPage } from './UtilComponents/ErrorPage';
 
 const styles = (theme: any) => createStyles({
     root: {
@@ -90,6 +91,12 @@ class Dashboard extends React.Component<Props, State> {
 			)
 		}
 
+		if (store.errorMessage) {
+			return (
+				<ErrorPage>{store.errorMessage}</ErrorPage>
+			)
+		}
+
 		return (
 			<div className={classes.root}>
 
@@ -105,6 +112,7 @@ class Dashboard extends React.Component<Props, State> {
 								messages={store.messages!}
 								roomUsers={store.roomUsers!}
 								userId={this.props.userId}
+								lastMessageId={store.getLastMessageId}
                             />
 						</div>
 					}
