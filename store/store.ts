@@ -62,7 +62,7 @@ export class Store {
                     // ako ne postoji kreiram novu sobu i postavljam je kao currentRoom
 
                 this.chatkitUser.subscribeToRoomMultipart({
-                    roomId: "19398846",
+                    roomId: "19401814",
                     messageLimit: 100,
                     hooks: {
                         onMessage: (message: Message) => {
