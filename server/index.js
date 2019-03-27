@@ -19,10 +19,7 @@ app.prepare().then(() => {
     }
     // server.use(bodyParser.json())
     server.use('/', applicationRoute)
-
-    if (dev) {
-        server.use('/api', apiRoute)
-    }
+    server.use('/api', apiRoute)
 
     server.get('*', (req, res) => {
         return handle(req, res)
