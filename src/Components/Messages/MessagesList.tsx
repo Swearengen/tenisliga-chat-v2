@@ -43,6 +43,12 @@ interface Props extends WithStyles<typeof styles> {
 
 class MessagesList extends React.Component<Props, {}> {
 
+    componentDidMount() {
+        if (this.props.lastMessageId) {
+            this.scrollToElement(this.props.lastMessageId)
+        }
+    }
+
     componentDidUpdate(prevProps: Props) {
         if (this.props.messages.length > prevProps.messages.length) {
             this.scrollToElement(this.props.lastMessageId!)

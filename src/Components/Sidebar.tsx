@@ -16,6 +16,7 @@ import PersonIcon from '@material-ui/icons/Person';
 
 import { DRAWER_WIDTH } from './Dashboard'
 import Search from './Search';
+import { SubscribedRoom } from '../../store/types';
 
 export const styles = (theme: any) => createStyles({
     toolbar: {
@@ -66,6 +67,9 @@ export const styles = (theme: any) => createStyles({
 
 interface Props extends WithStyles<typeof styles> {
     open: boolean;
+    currentRoomId: string
+    publicRooms: SubscribedRoom[]
+    changeCurrentRoomId: (id: string) => void
     handleDrawerClose: () => void
 }
 
@@ -89,23 +93,30 @@ class Sidebar extends React.Component<Props> {
                 <Divider />
 
                 <List>
-                    <div>
-                        <ListItem button disabled classes={{disabled: classes.disabled}}>
-                            <ListItemIcon>
-                                <PeopleIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Rooms" />
+                    <ListItem button disabled classes={{disabled: classes.disabled}}>
+                        <ListItemIcon>
+                            <PeopleIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Rooms" />
+                    </ListItem>
+
+                    {this.props.publicRooms.map(room =>
+                        <ListItem
+                            key={room.id}
+                            button
+                            selected={room.id === this.props.currentRoomId}
+                            classes={{
+                                root: classes.nestedListItem,
+                                selected: room.id === this.props.currentRoomId ? classes.selected : ''
+                            }}
+                            onClick={() => this.props.changeCurrentRoomId(room.id)}
+                        >
+                            <ListItemText
+                                secondary={room.name}
+                                classes={{secondary: this.props.currentRoomId ? classes.secondary : ''}}
+                            />
                         </ListItem>
-                        <ListItem button selected classes={{
-                            root: classes.nestedListItem,
-                            selected: classes.selected
-                        }}>
-                            <ListItemText secondary="General" classes={{secondary: classes.secondary}}/>
-                        </ListItem>
-                        <ListItem button className={classes.nestedListItem}>
-                            <ListItemText secondary="3.A liga 2019/10" />
-                        </ListItem>
-                    </div>
+                    )}
                 </List>
                 <Divider />
                 <List>

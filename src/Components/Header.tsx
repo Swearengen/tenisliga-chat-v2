@@ -10,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 
 import { DRAWER_WIDTH } from './Dashboard'
+import { SubscribedRoom } from '../../store/types';
 
 export const styles = (theme: any) => createStyles({
     appBar: {
@@ -43,7 +44,8 @@ export const styles = (theme: any) => createStyles({
 })
 
 interface Props extends WithStyles<typeof styles> {
-    open: boolean;
+    open: boolean
+    currentRoom: SubscribedRoom
     handleDrawerOpen: () => void
 }
 
@@ -73,7 +75,7 @@ class AppHeader extends React.Component<Props> {
                         noWrap
                         className={classes.title}
                     >
-                        Dashboard
+                        {this.props.currentRoom && this.props.currentRoom.name}
                     </Typography>
                     <div>
                         <img src="/static/logo.png" style={{height: '64px'}} />

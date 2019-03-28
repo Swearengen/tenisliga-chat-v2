@@ -20,9 +20,7 @@ export interface SubscribedRoom {
 
 export interface UserJoinedRoom {
     id: string;
-    member_user_ids: string[];
     name: string;
-    private: boolean;
 }
 
 export interface Message {
@@ -33,6 +31,10 @@ export interface Message {
     createdAt: string;
     updatedAt: string;
     text?: string;
+}
+
+export interface MessagesCollection {
+    [key: string]: Message[]
 }
 
 export enum PartType {

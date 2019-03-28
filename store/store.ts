@@ -3,7 +3,7 @@ import { useStaticRendering } from 'mobx-react'
 const Chatkit = require('@pusher/chatkit-client'); // todo: why import is not working
 import * as _ from 'lodash'
 
-import { UserJoinedRoom, SubscribedRoom, Message, RoomUser } from './types';
+import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, MessagesCollection } from './types';
 
 const isServer = !process.browser
 useStaticRendering(isServer)
@@ -13,17 +13,28 @@ const CHATKIT_INSTANCE_LOCATOR = process.env.CHATKIT_INSTANCE_LOCATOR
 
 export class Store {
     @observable errorMessage?: string
-    @observable userJoinedRooms?: UserJoinedRoom[]
     @observable loading: boolean = true;
     @observable chatkitUser: any = {}
-    @observable currentRoom?: SubscribedRoom
-    @observable messages?: Message[]
-    @observable roomUsers?: RoomUser[]
     @observable usersWhoAreTyping: string[] = []
+    @observable subscribedRooms?: SubscribedRoom[]
+    @observable messagesCollection: MessagesCollection = {}
+    @observable currentRoomId?: string
+
+    private userJoinedRooms?: UserJoinedRoom[]
 
     @action
     setUserJoinedRoom = (rooms: UserJoinedRoom[]) => {
         this.userJoinedRooms = rooms
+        this.userJoinedRooms.forEach(room => {
+            if (room.name === 'General') {
+                this.currentRoomId = room.id
+            }
+        })
+    }
+
+    @action
+    changeCurrentRoomId = (id: string) => {
+        this.currentRoomId = id
     }
 
     @action
@@ -44,55 +55,35 @@ export class Store {
         .then((currentUser: any) => {
             this.chatkitUser = currentUser
 
-            // 1. popis idejava svih soba treba dohvatit na serveru, metoda je getUserRooms
-                // proc kroz popis i u channels dodat sve sobe koje su public i koji su sobe od svake lige (customData neki)
-                // ostale su znaci privatne poruke
-
-            // 2. postavit na pocetku da je currentRoom general soba
-
-            // 3. tu se subscrijba i dodaje u general sobu
-                // trebalo bi tu subscrijabat na sve sobe
-                // u onMessage hook metodi odoavat message u store po id-ju
-                // u started i stoped typing metodama zapisivat u store samo ako je trenutni id jednak currentRoom id-ju
-
-            // 4. kad netko zeli promjenit sobu klikajuci po kanalima
-            // samo mjenjam currentRoom i u metodi getCurrentMessages (nova metoda) vracam trenutne poruke
-
-            // 5. kad dodam search za usere, odabirom iz dropdowna provjeravam dal postoji private soba sa tim userom
-                // ako postoji uzmem id te sobe i postavljam je kao currentRomm
-                // ako ne postoji kreiram novu sobu i postavljam je kao currentRoom
-
-            this.chatkitUser.subscribeToRoom({
-                roomId: "19401814",
-                messageLimit: 100,
-                hooks: {
-                    onMessage: (message: Message) => {
-                        this.messages = this.messages ? [...this.messages, message] : [message]
-                    },
-                    onUserStartedTyping: (user: RoomUser) => {
-                        this.usersWhoAreTyping = [...this.usersWhoAreTyping, user.name]
-                    },
-                    onUserStoppedTyping: (user: RoomUser) => {
-                        this.usersWhoAreTyping = this.usersWhoAreTyping.filter(
-                            username => username !== user.name
-                        )
+            this.userJoinedRooms!.forEach(room => {
+                this.chatkitUser.subscribeToRoom({
+                    roomId: room.id,
+                    messageLimit: 20,
+                    hooks: {
+                        onMessage: (message: Message) => {
+                            const roomMessages = this.messagesCollection[message.roomId]
+                            this.messagesCollection[message.roomId] = roomMessages ? [...roomMessages, message] : [message]
+                        },
+                        onUserStartedTyping: (user: RoomUser) => {
+                            this.usersWhoAreTyping = [...this.usersWhoAreTyping, user.name]
+                        },
+                        onUserStoppedTyping: (user: RoomUser) => {
+                            this.usersWhoAreTyping = this.usersWhoAreTyping.filter(
+                                username => username !== user.name
+                            )
+                        }
                     }
-                },
-            })
-            .then((currentRoom: SubscribedRoom) => {
-                this.loading = false
-
-                this.currentRoom = currentRoom
-                _.forEach(currentUser.users, (value) => {
-                    let roomUser = value
-                    this.roomUsers = this.roomUsers ? [...this.roomUsers, roomUser] : [roomUser]
-                });
-            })
-            .catch((err: any) => {
-                console.log(err);
-                this.loading = false
-                this.errorMessage = err.info ? err.info.error_description : 'Server error'
-            })
+                })
+                .then((currentRoom: SubscribedRoom) => {
+                    this.loading = false
+                    this.subscribedRooms = this.subscribedRooms ? [...this.subscribedRooms, currentRoom] : [currentRoom]
+                })
+                .catch((err: any) => {
+                    console.log(err);
+                    this.loading = false
+                    this.errorMessage = err.info ? err.info.error_description : 'Server error'
+                })
+            });
         })
         .catch((error: any) => {
             console.error(error)
@@ -102,7 +93,7 @@ export class Store {
     }
 
     public sendUserTypingEvent = () => {
-        this.chatkitUser.isTypingIn({roomId: this.currentRoom!.id})
+        this.chatkitUser.isTypingIn({roomId: this.currentRoomId})
             .catch((error: any) => {
                 console.log(error)
             })
@@ -111,7 +102,7 @@ export class Store {
     public sendMessage = (text: string) => {
         this.chatkitUser.sendSimpleMessage({
             text,
-            roomId: this.currentRoom!.id
+            roomId: this.currentRoomId
         })
         .catch((error: any) => {
             console.log(error)
@@ -121,12 +112,32 @@ export class Store {
     public connectUser = _.once(this.connectUserRequest)
 
     @computed
+    get messages() {
+        return this.messagesCollection[this.currentRoomId!]
+    }
+
+    @computed
+    get currentRoom() {
+        return _.find(this.subscribedRooms, ['id', this.currentRoomId])
+    }
+
+    @computed
     get getLastMessageId() {
         const lastMessage = _.last(this.messages)
         if (lastMessage) {
             return String(lastMessage.id)
         }
         return undefined
+    }
+
+    @computed
+    get privateRooms() {
+        return _.filter(this.subscribedRooms, 'isPrivate')
+    }
+
+    @computed
+    get publicRooms() {
+        return _.filter(this.subscribedRooms, ['isPrivate', false])
     }
 }
 

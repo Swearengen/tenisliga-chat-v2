@@ -100,17 +100,27 @@ class Dashboard extends React.Component<Props, State> {
 		return (
 			<div className={classes.root}>
 
-				<AppHeader open={this.state.open} handleDrawerOpen={this.handleDrawerOpen} />
-				<Sidebar open={this.state.open} handleDrawerClose={this.handleDrawerClose} />
+				<AppHeader
+					open={this.state.open}
+					handleDrawerOpen={this.handleDrawerOpen}
+					currentRoom={store.currentRoom!}
+				/>
+				<Sidebar
+					open={this.state.open}
+					currentRoomId={store.currentRoomId!}
+					publicRooms={store.publicRooms}
+					handleDrawerClose={this.handleDrawerClose}
+					changeCurrentRoomId={store.changeCurrentRoomId}
+				/>
 
 				<main className={classes.content}>
 					{
 						!_.isEmpty(store.messages) &&
-						!_.isEmpty(store.roomUsers) &&
+						!_.isEmpty(store.currentRoom) &&
 						<div>
 							<MessagesList
 								messages={store.messages!}
-								roomUsers={store.roomUsers!}
+								roomUsers={store.currentRoom!.users}
 								userId={this.props.userId}
 								lastMessageId={store.getLastMessageId}
                             />
