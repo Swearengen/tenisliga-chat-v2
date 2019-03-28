@@ -7,7 +7,7 @@ import { WithStyles, withStyles, createStyles } from '@material-ui/core/styles';
 import { Store } from '../../store/store';
 import { Loader } from './UtilComponents/Loader';
 import AppHeader  from './Header'
-import Sidebar from './Sidebar';
+import Sidebar from './Sidebar/Sidebar';
 import MessagesList from './Messages/MessagesList';
 import MessageForm from './Messages/MessageForm';
 import TypingIndicator from './Messages/TypingIndicator';

@@ -14,9 +14,10 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import PeopleIcon from '@material-ui/icons/People';
 import PersonIcon from '@material-ui/icons/Person';
 
-import { DRAWER_WIDTH } from './Dashboard'
+import { DRAWER_WIDTH } from '../Dashboard'
 import Search from './Search';
-import { SubscribedRoom } from '../../store/types';
+import { SubscribedRoom } from '../../../store/types';
+import RoomsListHeader from './RoomsListHeader';
 
 export const styles = (theme: any) => createStyles({
     toolbar: {
@@ -60,9 +61,9 @@ export const styles = (theme: any) => createStyles({
         color: 'inherit',
         fontWeight: 'inherit'
     },
-    disabled: {
-        opacity: 1
-    }
+    // disabled: {
+    //     opacity: 1
+    // }
 })
 
 interface Props extends WithStyles<typeof styles> {
@@ -93,13 +94,7 @@ class Sidebar extends React.Component<Props> {
                 <Divider />
 
                 <List>
-                    <ListItem button disabled classes={{disabled: classes.disabled}}>
-                        <ListItemIcon>
-                            <PeopleIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Rooms" />
-                    </ListItem>
-
+                    <RoomsListHeader title="Rooms"><PeopleIcon/></RoomsListHeader>
                     {this.props.publicRooms.map(room =>
                         <ListItem
                             key={room.id}
@@ -121,12 +116,7 @@ class Sidebar extends React.Component<Props> {
                 <Divider />
                 <List>
                     <div>
-                        <ListItem button disabled classes={{disabled: classes.disabled}}>
-                            <ListItemIcon>
-                                <PersonIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="People" />
-                        </ListItem>
+                        <RoomsListHeader title="People"><PersonIcon /></RoomsListHeader>
                         <ListItem button className={classes.nestedListItem}>
                             <ListItemText secondary="Neko ime" />
                         </ListItem>
