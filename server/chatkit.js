@@ -5,8 +5,6 @@ const dotenv = require('dotenv').config({
     path: path.join(__dirname, `../environment/.env.${prod ? 'prod' : 'dev'}`)
 })
 
-const GENERAL_ROOM_ID = '19401814'
-
 module.exports = {
     instance: new Chatkit.default({
         instanceLocator: process.env.CHATKIT_INSTANCE_LOCATOR,
@@ -27,7 +25,7 @@ module.exports = {
 
     addUserToGeneralRoom: async function(userId) {
         return await this.instance.addUsersToRoom({
-            roomId: GENERAL_ROOM_ID,
+            roomId: process.env.GENERAL_ROOM_ID,
             userIds: [userId]
         })
     },
