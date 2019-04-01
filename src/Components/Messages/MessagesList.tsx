@@ -20,8 +20,7 @@ const styles = (theme: any) => ({
         overflowX: 'hidden' as 'hidden',
         overflowY: 'scroll' as 'scroll',
         left: '0',
-        right: '0',
-        paddingBottom: '190px',
+        right: '0'
     },
     scrollToEndStyles: {
         position: 'fixed' as 'fixed',
@@ -31,6 +30,9 @@ const styles = (theme: any) => ({
         padding: '3px',
         borderRadius: '50%',
         cursor: 'pointer'
+    },
+    listStyle: {
+        paddingBottom: '200px'
     }
 });
 
@@ -103,7 +105,9 @@ class MessagesList extends React.Component<Props, {}> {
             <div className={this.props.classes.rootStyles} id="scroll-container">
                 <Grid container justify = "center">
                     <Grid item xs={10}>
-                        <List>
+                        <List classes={{
+                            root: this.props.classes.listStyle
+                        }}>
                             {this.props.messages.map((message) => this.renderMessage(message))}
                         </List>
                     </Grid>

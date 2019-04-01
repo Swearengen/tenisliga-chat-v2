@@ -130,7 +130,7 @@ class Dashboard extends React.Component<Props, State> {
 						</div>
 					}
 					<div className={classes.footer}>
-						<TypingIndicator usersWhoAreTyping={store.usersWhoAreTyping} />
+						<TypingIndicator usersWhoAreTyping={store.usersWhoAreTypingInRoom} />
                         <MessageForm onChange={this.sendTypingEvent} onSubmit={this.sendMessage} />
 					</div>
 				</main>

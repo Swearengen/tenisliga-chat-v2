@@ -24,7 +24,7 @@ export class Store {
     @observable errorMessage?: string
     @observable loading: boolean = true;
     @observable chatkitUser: any = {}
-    @observable usersWhoAreTyping: string[] = []
+    @observable usersWhoAreTyping: RoomDataCollection<string[]> = {}
     @observable subscribedRooms?: SubscribedRoom[]
     @observable messagesCollection: RoomDataCollection<Message[]> = {}
     @observable currentRoomId?: string
@@ -90,13 +90,16 @@ export class Store {
                             this.messagesCollection[message.roomId] = roomMessages ? [...roomMessages, message] : [message]
                         },
                         onUserStartedTyping: (user: RoomUser) => {
-                            // todo: ovo bi trebalo isto stavit po room id. jer se inace prikazuju useri koji tipkaju bilo di
-                            this.usersWhoAreTyping = [...this.usersWhoAreTyping, user.name]
+                            this.usersWhoAreTyping[room.id] =
+                                this.usersWhoAreTyping[room.id] ? [...this.usersWhoAreTyping[room.id], user.name] : [user.name]
+
                         },
                         onUserStoppedTyping: (user: RoomUser) => {
-                            this.usersWhoAreTyping = this.usersWhoAreTyping.filter(
-                                username => username !== user.name
-                            )
+                            if (this.usersWhoAreTyping[room.id]) {
+                                this.usersWhoAreTyping[room.id] = this.usersWhoAreTyping[room.id].filter(
+                                    username => username !== user.name
+                                )
+                            }
                         }
                     }
                 })
@@ -170,7 +173,10 @@ export class Store {
 
     @computed
     get publicRooms() {
-        return _.filter(this.subscribedRooms, ['isPrivate', false])
+        return _.chain(this.subscribedRooms)
+            .filter(['isPrivate', false])
+            .sortBy((room: SubscribedRoom) => room.name === 'General' ? 1 : 99)
+            .value()
     }
 
     @computed
@@ -186,6 +192,14 @@ export class Store {
         })
 
         return notificationsCollection
+    }
+
+    @computed
+    get usersWhoAreTypingInRoom(): string[] {
+        if (!_.isEmpty(this.usersWhoAreTyping[this.currentRoomId!])) {
+            return this.usersWhoAreTyping[this.currentRoomId!]
+        }
+        return []
     }
 }
 
