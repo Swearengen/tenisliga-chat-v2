@@ -10,13 +10,14 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import PeopleIcon from '@material-ui/icons/People';
 import PersonIcon from '@material-ui/icons/Person';
 
+import DraftsIcon from '@material-ui/icons/Drafts'
+
 import { DRAWER_WIDTH } from '../Dashboard'
 import Search from './Search';
-import { SubscribedRoom } from '../../../store/types';
+import { SubscribedRoom, RoomDataCollection } from '../../../store/types';
 import RoomsListHeader from './RoomsListHeader';
 
 export const styles = (theme: any) => createStyles({
@@ -61,15 +62,22 @@ export const styles = (theme: any) => createStyles({
         color: 'inherit',
         fontWeight: 'inherit'
     },
-    // disabled: {
-    //     opacity: 1
-    // }
+    notification: {
+        padding: '2px 2px 0 2px',
+        backgroundColor: theme.palette.error.main,
+        borderRadius: '50%'
+    },
+    notificationIcon: {
+        fontSize: '14px',
+        color: 'white'
+    }
 })
 
 interface Props extends WithStyles<typeof styles> {
     open: boolean;
     currentRoomId: string
     publicRooms: SubscribedRoom[]
+    notificationsCollection: RoomDataCollection<boolean>
     changeCurrentRoomId: (id: string) => void
     handleDrawerClose: () => void
 }
@@ -110,6 +118,13 @@ class Sidebar extends React.Component<Props> {
                                 secondary={room.name}
                                 classes={{secondary: this.props.currentRoomId ? classes.secondary : ''}}
                             />
+                            {this.props.notificationsCollection[room.id] &&
+                                <div className={classes.notification}>
+                                    <DraftsIcon fontSize="small" classes={{
+                                        root: classes.notificationIcon
+                                    }} />
+                                </div>
+                            }
                         </ListItem>
                     )}
                 </List>

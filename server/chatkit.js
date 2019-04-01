@@ -23,6 +23,11 @@ module.exports = {
             .then((res) => res)
     },
 
+    getReadCursorsForUser: async function(userId) {
+        return await this.instance.getReadCursorsForUser({userId})
+            .then((res) => res)
+    },
+
     addUserToGeneralRoom: async function(userId) {
         return await this.instance.addUsersToRoom({
             roomId: process.env.GENERAL_ROOM_ID,

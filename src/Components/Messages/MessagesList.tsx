@@ -35,10 +35,12 @@ const styles = (theme: any) => ({
 });
 
 interface Props extends WithStyles<typeof styles> {
-    messages: Message[];
-    lastMessageId?: string;
-    roomUsers: RoomUser[];
-    userId: string;
+    messages: Message[]
+    lastMessageId?: string
+    roomUsers: RoomUser[]
+    userId: string
+    currentRoomId: string
+    onSetCursor: () => void
 }
 
 class MessagesList extends React.Component<Props, {}> {
@@ -47,11 +49,17 @@ class MessagesList extends React.Component<Props, {}> {
         if (this.props.lastMessageId) {
             this.scrollToElement(this.props.lastMessageId)
         }
+        this.props.onSetCursor()
     }
 
     componentDidUpdate(prevProps: Props) {
         if (this.props.messages.length > prevProps.messages.length) {
             this.scrollToElement(this.props.lastMessageId!)
+            this.props.onSetCursor()
+        }
+
+        if (prevProps.currentRoomId !== this.props.currentRoomId) {
+            this.props.onSetCursor()
         }
     }
 

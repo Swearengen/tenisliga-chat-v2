@@ -11,9 +11,10 @@ router.get('/', async (req, res) => {
 			// existing user
 			const user = await chatkit.instance.getUser({id: userId})
 			const userRooms = await chatkit.getUserRooms(userId)
+			const userCursors = await chatkit.getReadCursorsForUser(userId)
 
 			if (user) {
-				nextApp.app.render(req, res, '/', {...req.query, userRooms})
+				nextApp.app.render(req, res, '/', {...req.query, userRooms, userCursors})
 			}
 		} catch (error) {
 			if (error.error === 'services/chatkit/not_found/user_not_found') {

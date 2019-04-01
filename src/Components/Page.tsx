@@ -2,13 +2,14 @@ import React from 'react'
 import { inject, observer } from 'mobx-react'
 
 import { Store } from '../../store/store'
-import { UserJoinedRoom } from '../../store/types';
+import { UserJoinedRoom, Cursor } from '../../store/types';
 import Dashboard from './Dashboard'
 
 interface Props {
     userName: string;
     userId: string;
     userRooms: UserJoinedRoom[]
+    userCursors?: Cursor[]
 }
 
 interface InjectedProps extends Props {
@@ -24,6 +25,9 @@ class Page extends React.Component<Props> {
     }
     componentDidMount() {
         this.injected.store.setUserJoinedRoom(this.props.userRooms)
+        if (this.props.userCursors) {
+            this.injected.store.setInitialCursorCollection(this.props.userCursors)
+        }
     }
 
     render() {

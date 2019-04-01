@@ -109,6 +109,7 @@ class Dashboard extends React.Component<Props, State> {
 					open={this.state.open}
 					currentRoomId={store.currentRoomId!}
 					publicRooms={store.publicRooms}
+					notificationsCollection={store.notificationsCollection}
 					handleDrawerClose={this.handleDrawerClose}
 					changeCurrentRoomId={store.changeCurrentRoomId}
 				/>
@@ -123,6 +124,8 @@ class Dashboard extends React.Component<Props, State> {
 								roomUsers={store.currentRoom!.users}
 								userId={this.props.userId}
 								lastMessageId={store.getLastMessageId}
+								currentRoomId={store.currentRoomId!}
+								onSetCursor={store.setCursor}
                             />
 						</div>
 					}

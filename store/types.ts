@@ -33,8 +33,18 @@ export interface Message {
     text?: string;
 }
 
-export interface MessagesCollection {
-    [key: string]: Message[]
+export interface RoomDataCollection<T> {
+    [key: string]: T
+}
+
+export interface Cursor {
+    position: number
+    room_id: string
+}
+
+export interface CursorHook {
+    position: number
+    roomId: string
 }
 
 export enum PartType {

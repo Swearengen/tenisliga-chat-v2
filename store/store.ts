@@ -1,9 +1,9 @@
-import { action, observable, computed } from 'mobx'
+import { action, observable, computed, runInAction } from 'mobx'
 import { useStaticRendering } from 'mobx-react'
 const Chatkit = require('@pusher/chatkit-client'); // todo: why import is not working
 import * as _ from 'lodash'
 
-import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, MessagesCollection } from './types';
+import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, RoomDataCollection, Cursor, CursorHook } from './types';
 
 const isServer = !process.browser
 useStaticRendering(isServer)
@@ -11,16 +11,25 @@ useStaticRendering(isServer)
 const API_URL = process.env.API_URL
 const CHATKIT_INSTANCE_LOCATOR = process.env.CHATKIT_INSTANCE_LOCATOR
 
+// 1. izlistat recimo 5 usera selectanog channela
+//  klikom na usera treba provjerit dal postoji room s tim userom.
+//  ako postoji samo postavit currentRoomId
+
+// 2. ako ne postoji room, kreirat novi room. u addUserIds dodat usera
+//  postavit currentUserId novog rooma
+
+// 3. dodat u connect hook onAddedToRoom, subscrijbat se na taj room
+
 export class Store {
     @observable errorMessage?: string
     @observable loading: boolean = true;
     @observable chatkitUser: any = {}
     @observable usersWhoAreTyping: string[] = []
     @observable subscribedRooms?: SubscribedRoom[]
-    @observable messagesCollection: MessagesCollection = {}
+    @observable messagesCollection: RoomDataCollection<Message[]> = {}
     @observable currentRoomId?: string
-
-    private userJoinedRooms?: UserJoinedRoom[]
+    @observable userJoinedRooms?: UserJoinedRoom[]
+    @observable cursorCollection: RoomDataCollection<number> = {}
 
     @action
     setUserJoinedRoom = (rooms: UserJoinedRoom[]) => {
@@ -31,6 +40,14 @@ export class Store {
             }
         })
     }
+
+    @action
+    setInitialCursorCollection = (cursors: Cursor[]) => {
+        cursors.forEach(cursor => {
+            this.cursorCollection[cursor.room_id] = cursor.position
+        })
+    }
+
 
     @action
     changeCurrentRoomId = (id: string) => {
@@ -51,7 +68,15 @@ export class Store {
 
 
         chatManager
-        .connect()
+        .connect({
+            onNewReadCursor: (cursor: CursorHook) => {
+                runInAction(() => {
+                    if (cursor.roomId) {
+                        this.cursorCollection[cursor.roomId] = cursor.position
+                    }
+                })
+            }
+        })
         .then((currentUser: any) => {
             this.chatkitUser = currentUser
 
@@ -65,6 +90,7 @@ export class Store {
                             this.messagesCollection[message.roomId] = roomMessages ? [...roomMessages, message] : [message]
                         },
                         onUserStartedTyping: (user: RoomUser) => {
+                            // todo: ovo bi trebalo isto stavit po room id. jer se inace prikazuju useri koji tipkaju bilo di
                             this.usersWhoAreTyping = [...this.usersWhoAreTyping, user.name]
                         },
                         onUserStoppedTyping: (user: RoomUser) => {
@@ -109,6 +135,13 @@ export class Store {
         })
     }
 
+    public setCursor = () => {
+        this.chatkitUser.setReadCursor({
+            roomId: String(this.currentRoomId),
+            position: parseInt(this.getLastMessageId!)
+        })
+    }
+
     public connectUser = _.once(this.connectUserRequest)
 
     @computed
@@ -138,6 +171,21 @@ export class Store {
     @computed
     get publicRooms() {
         return _.filter(this.subscribedRooms, ['isPrivate', false])
+    }
+
+    @computed
+    get notificationsCollection(): RoomDataCollection<boolean> {
+        const notificationsCollection: RoomDataCollection<boolean> = {}
+        _.forEach(this.messagesCollection, (messages: Message[], key: string) => {
+            if (_.isEmpty(messages)) {
+                notificationsCollection[key] = false
+            } else {
+                const lastMessage = _.last(messages!)
+                notificationsCollection[key] = lastMessage!.id !== this.cursorCollection[key]
+            }
+        })
+
+        return notificationsCollection
     }
 }
 
