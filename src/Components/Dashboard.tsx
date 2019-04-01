@@ -72,12 +72,12 @@ class Dashboard extends React.Component<Props, State> {
 		this.setState({ open: false });
 	};
 
-	sendTypingEvent = () => {
-        this.props.store.sendUserTypingEvent()
+	onMessageFormChange = (text: string) => {
+        this.props.store.setMessageToSend(text)
 	}
 
-	sendMessage = (text: string) => {
-        this.props.store.sendMessage(text)
+	sendMessage = () => {
+        this.props.store.sendMessage()
 	}
 
 	render() {
@@ -131,7 +131,11 @@ class Dashboard extends React.Component<Props, State> {
 					}
 					<div className={classes.footer}>
 						<TypingIndicator usersWhoAreTyping={store.usersWhoAreTypingInRoom} />
-                        <MessageForm onChange={this.sendTypingEvent} onSubmit={this.sendMessage} />
+						<MessageForm
+							value={store.messageToSend}
+							onChange={this.onMessageFormChange}
+							onSubmit={this.sendMessage}
+						/>
 					</div>
 				</main>
 

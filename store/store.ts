@@ -1,4 +1,4 @@
-import { action, observable, computed, runInAction } from 'mobx'
+import { action, observable, computed } from 'mobx'
 import { useStaticRendering } from 'mobx-react'
 const Chatkit = require('@pusher/chatkit-client'); // todo: why import is not working
 import * as _ from 'lodash'
@@ -30,6 +30,7 @@ export class Store {
     @observable currentRoomId?: string
     @observable userJoinedRooms?: UserJoinedRoom[]
     @observable cursorCollection: RoomDataCollection<number> = {}
+    @observable sendMessagesCollection: RoomDataCollection<string> = {}
 
     @action
     setUserJoinedRoom = (rooms: UserJoinedRoom[]) => {
@@ -55,6 +56,26 @@ export class Store {
     }
 
     @action
+    setMessageToSend = (text: string) => {
+        this.sendMessagesCollection[this.currentRoomId!] = text
+        this.sendUserTypingEvent()
+    }
+
+    @action
+    sendMessage = () => {
+        this.chatkitUser.sendSimpleMessage({
+            text: this.messageToSend,
+            roomId: this.currentRoomId
+        })
+        .then(() => {
+            this.sendMessagesCollection[this.currentRoomId!] = ''
+        })
+        .catch((error: any) => {
+            console.log(error)
+        })
+    }
+
+    @action
     public connectUserRequest = (userId: string) => {
         this.loading = true
 
@@ -70,11 +91,9 @@ export class Store {
         chatManager
         .connect({
             onNewReadCursor: (cursor: CursorHook) => {
-                runInAction(() => {
-                    if (cursor.roomId) {
-                        this.cursorCollection[cursor.roomId] = cursor.position
-                    }
-                })
+                if (cursor.roomId) {
+                    this.cursorCollection[cursor.roomId] = cursor.position
+                }
             }
         })
         .then((currentUser: any) => {
@@ -126,16 +145,6 @@ export class Store {
             .catch((error: any) => {
                 console.log(error)
             })
-    }
-
-    public sendMessage = (text: string) => {
-        this.chatkitUser.sendSimpleMessage({
-            text,
-            roomId: this.currentRoomId
-        })
-        .catch((error: any) => {
-            console.log(error)
-        })
     }
 
     public setCursor = () => {
@@ -200,6 +209,11 @@ export class Store {
             return this.usersWhoAreTyping[this.currentRoomId!]
         }
         return []
+    }
+
+    @computed
+    get messageToSend(): string {
+        return this.sendMessagesCollection[this.currentRoomId!]
     }
 }
 
