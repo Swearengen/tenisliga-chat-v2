@@ -9,13 +9,17 @@ export interface RoomUser {
     avatarUrl?: string;
 }
 
+export interface PresenceData {
+    [key: string]: 'online' | 'offline'
+}
+
 export interface SubscribedRoom {
     id: string;
     name?: string;
     isPrivate: boolean;
     customData?: Object;
     userIds?: string[];
-    users: Array<any>
+    users: RoomUser[]
 }
 
 export interface UserJoinedRoom {

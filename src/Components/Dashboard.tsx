@@ -2,6 +2,8 @@ import React from 'react';
 import * as _ from 'lodash'
 
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
+
 import { WithStyles, withStyles, createStyles } from '@material-ui/core/styles';
 
 import { Store } from '../../store/store';
@@ -84,7 +86,6 @@ class Dashboard extends React.Component<Props, State> {
 		const { classes } = this.props
 		const { store } = this.props
 
-
 		if (store.loading) {
 			return (
 				<Loader />
@@ -110,8 +111,11 @@ class Dashboard extends React.Component<Props, State> {
 					currentRoomId={store.currentRoomId!}
 					publicRooms={store.publicRooms}
 					notificationsCollection={store.notificationsCollection}
+					leagueRoom={store.leagueRoom}
+					leagueUsers={store.usersFromLeagueRoom}
 					handleDrawerClose={this.handleDrawerClose}
 					changeCurrentRoomId={store.changeCurrentRoomId}
+					presenceData={toJS(store.presenceData)}
 				/>
 
 				<main className={classes.content}>

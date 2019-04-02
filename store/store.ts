@@ -3,7 +3,7 @@ import { useStaticRendering } from 'mobx-react'
 const Chatkit = require('@pusher/chatkit-client'); // todo: why import is not working
 import * as _ from 'lodash'
 
-import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, RoomDataCollection, Cursor, CursorHook } from './types';
+import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, RoomDataCollection, Cursor, CursorHook, PresenceData } from './types';
 
 const isServer = !process.browser
 useStaticRendering(isServer)
@@ -31,6 +31,7 @@ export class Store {
     @observable userJoinedRooms?: UserJoinedRoom[]
     @observable cursorCollection: RoomDataCollection<number> = {}
     @observable sendMessagesCollection: RoomDataCollection<string> = {}
+    @observable presenceData: PresenceData = {}
 
     @action
     setUserJoinedRoom = (rooms: UserJoinedRoom[]) => {
@@ -94,6 +95,10 @@ export class Store {
                 if (cursor.roomId) {
                     this.cursorCollection[cursor.roomId] = cursor.position
                 }
+            },
+            onPresenceChanged: (state: any, user: any) => {
+
+                this.presenceData[user.id] = state.current
             }
         })
         .then((currentUser: any) => {
@@ -186,6 +191,27 @@ export class Store {
             .filter(['isPrivate', false])
             .sortBy((room: SubscribedRoom) => room.name === 'General' ? 1 : 99)
             .value()
+    }
+
+    @computed
+    get leagueRoom() {
+        // todo: tu dohvatit usere koji su roomu lige.
+        // dohvatit sobu po customData
+        return _.find(this.subscribedRooms, ['name', 'Room 1'])
+    }
+
+    @computed
+    get usersFromLeagueRoom(): any {
+        if (this.leagueRoom) {
+            const userIds = _.difference(this.leagueRoom.userIds, [this.chatkitUser.id])
+
+            return _.filter(this.chatkitUser.userStore.users, _.flow(
+                _.identity,
+                _.property('id'),
+                _.partial(_.includes, userIds)
+            ))
+        }
+        return []
     }
 
     @computed

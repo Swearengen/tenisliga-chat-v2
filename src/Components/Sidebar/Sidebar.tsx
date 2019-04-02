@@ -6,19 +6,16 @@ import { WithStyles, withStyles, createStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import PeopleIcon from '@material-ui/icons/People';
 import PersonIcon from '@material-ui/icons/Person';
 
-import DraftsIcon from '@material-ui/icons/Drafts'
-
 import { DRAWER_WIDTH } from '../Dashboard'
 import Search from './Search';
-import { SubscribedRoom, RoomDataCollection } from '../../../store/types';
+import { SubscribedRoom, RoomDataCollection, PresenceData } from '../../../store/types';
 import RoomsListHeader from './RoomsListHeader';
+import RoomItem from './RoomItem';
 
 export const styles = (theme: any) => createStyles({
     toolbar: {
@@ -49,27 +46,6 @@ export const styles = (theme: any) => createStyles({
                 display: 'block',
           width: theme.spacing.unit * 9,
         },
-    },
-    nestedListItem: {
-        paddingLeft: '25px',
-        '&$selected': {
-            color: '#3c3c3c',
-            fontWeight: 900
-        },
-    },
-    selected: {},
-    secondary: {
-        color: 'inherit',
-        fontWeight: 'inherit'
-    },
-    notification: {
-        padding: '2px 2px 0 2px',
-        backgroundColor: theme.palette.error.main,
-        borderRadius: '50%'
-    },
-    notificationIcon: {
-        fontSize: '14px',
-        color: 'white'
     }
 })
 
@@ -78,11 +54,31 @@ interface Props extends WithStyles<typeof styles> {
     currentRoomId: string
     publicRooms: SubscribedRoom[]
     notificationsCollection: RoomDataCollection<boolean>
+    leagueRoom?: SubscribedRoom
+    leagueUsers?: any
+    presenceData: PresenceData
     changeCurrentRoomId: (id: string) => void
     handleDrawerClose: () => void
 }
 
 class Sidebar extends React.Component<Props> {
+
+    leagueUserClicked = (id: string) => {
+        console.log(id, 'id');
+    }
+
+    renderLeagueUsers = () => {
+        return this.props.leagueUsers.map((user: any) =>
+            <RoomItem
+                key={user.id}
+                item={user}
+                selected={false}
+                showNotification={false}
+                onClick={this.leagueUserClicked}
+                presenceData={this.props.presenceData}
+            />
+        );
+    }
 
     render () {
         const { classes } = this.props
@@ -104,42 +100,27 @@ class Sidebar extends React.Component<Props> {
                 <List>
                     <RoomsListHeader title="Rooms"><PeopleIcon/></RoomsListHeader>
                     {this.props.publicRooms.map(room =>
-                        <ListItem
+                        <RoomItem
                             key={room.id}
-                            button
+                            item={room}
                             selected={room.id === this.props.currentRoomId}
-                            classes={{
-                                root: classes.nestedListItem,
-                                selected: room.id === this.props.currentRoomId ? classes.selected : ''
-                            }}
-                            onClick={() => this.props.changeCurrentRoomId(room.id)}
-                        >
-                            <ListItemText
-                                secondary={room.name}
-                                classes={{secondary: this.props.currentRoomId ? classes.secondary : ''}}
-                            />
-                            {this.props.notificationsCollection[room.id] &&
-                                <div className={classes.notification}>
-                                    <DraftsIcon fontSize="small" classes={{
-                                        root: classes.notificationIcon
-                                    }} />
-                                </div>
-                            }
-                        </ListItem>
+                            showNotification={this.props.notificationsCollection[room.id]}
+                            onClick={this.props.changeCurrentRoomId}
+                        />
                     )}
                 </List>
                 <Divider />
-                <List>
-                    <div>
-                        <RoomsListHeader title="People"><PersonIcon /></RoomsListHeader>
-                        <ListItem button className={classes.nestedListItem}>
-                            <ListItemText secondary="Neko ime" />
-                        </ListItem>
-                        <ListItem button className={classes.nestedListItem}>
-                            <ListItemText secondary="Drugo ime" />
-                        </ListItem>
-                    </div>
-                </List>
+                {this.props.leagueRoom &&
+                    <List>
+                        <div>
+                            <RoomsListHeader title={this.props.leagueRoom.name!}>
+                                <PersonIcon />
+                            </RoomsListHeader>
+                            {this.renderLeagueUsers()}
+                        </div>
+                    </List>
+                }
+                <Divider />
             </Drawer>
         )
     }
