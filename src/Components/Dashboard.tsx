@@ -109,12 +109,15 @@ class Dashboard extends React.Component<Props, State> {
 				<Sidebar
 					open={this.state.open}
 					currentRoomId={store.currentRoomId!}
+					userId={this.props.userId}
 					publicRooms={store.publicRooms}
+					privateRooms={store.privateRooms}
 					notificationsCollection={store.notificationsCollection}
 					leagueRoom={store.leagueRoom}
 					leagueUsers={store.usersFromLeagueRoom}
 					handleDrawerClose={this.handleDrawerClose}
 					changeRoom={store.changeRoom}
+					leagueUserClicked={store.leagueUserClicked}
 					presenceData={toJS(store.presenceData)}
 				/>
 

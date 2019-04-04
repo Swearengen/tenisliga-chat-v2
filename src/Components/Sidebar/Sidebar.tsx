@@ -1,5 +1,6 @@
 import React from 'react'
 import cc from 'classcat'
+import * as _ from 'lodash'
 
 import { WithStyles, withStyles, createStyles } from '@material-ui/core/styles';
 
@@ -13,7 +14,7 @@ import PersonIcon from '@material-ui/icons/Person';
 
 import { DRAWER_WIDTH } from '../Dashboard'
 import Search from './Search';
-import { RoomDataCollection, PresenceData, UserJoinedRoom } from '../../../store/types';
+import { RoomDataCollection, PresenceData, UserJoinedRoom, RoomUser } from '../../../store/types';
 import RoomsListHeader from './RoomsListHeader';
 import RoomItem from './RoomItem';
 
@@ -52,19 +53,22 @@ export const styles = (theme: any) => createStyles({
 interface Props extends WithStyles<typeof styles> {
     open: boolean;
     currentRoomId: string
+    userId: string
     publicRooms: UserJoinedRoom[]
+    privateRooms: UserJoinedRoom[]
     notificationsCollection: RoomDataCollection<boolean>
     leagueRoom?: UserJoinedRoom
     leagueUsers?: any
     presenceData: PresenceData
     changeRoom: (id: string) => void
+    leagueUserClicked: (user: RoomUser) => void
     handleDrawerClose: () => void
 }
 
 class Sidebar extends React.Component<Props> {
 
-    leagueUserClicked = (id: string) => {
-        console.log(id, 'id');
+    leagueUserClicked = (user: RoomUser) => {
+        this.props.leagueUserClicked(user)
     }
 
     renderLeagueUsers = () => {
@@ -74,10 +78,30 @@ class Sidebar extends React.Component<Props> {
                 item={user}
                 selected={false}
                 showNotification={false}
-                onClick={this.leagueUserClicked}
+                onClick={(id: string) => this.leagueUserClicked(user)}
                 presenceData={this.props.presenceData}
+                presenceIdToCheck={user.id}
             />
         );
+    }
+
+    renderPrivateMessages = () => {
+        const privateRooms = this.props.privateRooms.map((room: UserJoinedRoom) => {
+            const presenceIdToCheck = _.find(room.member_user_ids, (id: string) => id !== this.props.userId)
+            return (
+                <RoomItem
+                    key={room.id}
+                    item={room}
+                    selected={room.id === this.props.currentRoomId}
+                    showNotification={this.props.notificationsCollection[room.id]}
+                    onClick={this.props.changeRoom}
+                    presenceData={this.props.presenceData}
+                    presenceIdToCheck={presenceIdToCheck}
+                />
+            )
+        });
+
+        return privateRooms
     }
 
     render () {
@@ -112,15 +136,21 @@ class Sidebar extends React.Component<Props> {
                 <Divider />
                 {this.props.leagueRoom &&
                     <List>
-                        <div>
-                            <RoomsListHeader title={this.props.leagueRoom.name!}>
-                                <PersonIcon />
-                            </RoomsListHeader>
-                            {this.renderLeagueUsers()}
-                        </div>
+                        <RoomsListHeader title={this.props.leagueRoom.name!}>
+                            <PersonIcon />
+                        </RoomsListHeader>
+                        {this.renderLeagueUsers()}
                     </List>
                 }
                 <Divider />
+                {this.props.privateRooms &&
+                    <List>
+                        <RoomsListHeader title="Private Messages">
+                            <PersonIcon />
+                        </RoomsListHeader>
+                        {this.renderPrivateMessages()}
+                    </List>
+                }
             </Drawer>
         )
     }

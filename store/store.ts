@@ -4,6 +4,7 @@ const Chatkit = require('@pusher/chatkit-client'); // todo: why import is not wo
 import * as _ from 'lodash'
 
 import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, RoomDataCollection, Cursor, CursorHook, PresenceData } from './types';
+import { mapSubscribedRoomToUserJoinedRoom, findPrivateRoom } from './utils';
 
 const isServer = !process.browser
 useStaticRendering(isServer)
@@ -11,14 +12,9 @@ useStaticRendering(isServer)
 const API_URL = process.env.API_URL
 const CHATKIT_INSTANCE_LOCATOR = process.env.CHATKIT_INSTANCE_LOCATOR
 
-// 1. izlistat recimo 5 usera selectanog channela
-//  klikom na usera treba provjerit dal postoji room s tim userom.
-//  ako postoji samo postavit currentRoomId
-
-// 2. ako ne postoji room, kreirat novi room. u addUserIds dodat usera
-//  postavit currentUserId novog rooma
-
-// 3. dodat u connect hook onAddedToRoom, subscrijbat se na taj room
+// 1. provjerit sta se dogada kada currentUsera doda netko u privateRoom
+// 2. sredit imenovanje privatnih poruka
+// 3. provjerit notifikacije za privatne poruke
 
 export class Store {
     @observable errorMessage?: string
@@ -66,6 +62,31 @@ export class Store {
     }
 
     @action
+    leagueUserClicked = (user: RoomUser) => {
+        const existingRoom = findPrivateRoom(user, this.chatkitUser.id, this.privateRooms)
+
+        if (existingRoom) {
+            this.changeRoom(existingRoom.id)
+        } else {
+            this.chatkitUser.createRoom({
+                name: `${this.chatkitUser.name}-${user.name}`,
+                private: true,
+                addUserIds: [user.id]
+            })
+            .then((room: SubscribedRoom) => {
+                const mapedToUserJoinedRoom = mapSubscribedRoomToUserJoinedRoom(room)
+                this.userJoinedRooms = [
+                    ...this.userJoinedRooms!,
+                    {...mapedToUserJoinedRoom,
+                        member_user_ids: [this.chatkitUser.id, user.id] // iz nekog razloga rooom.userIds je prazno pa rucno postavljam
+                    }
+                ]
+                this.connectToRoom(room.id)
+            })
+        }
+    }
+
+    @action
     setMessageToSend = (text: string) => {
         this.sendMessagesCollection[this.currentRoomId!] = text
         this.sendUserTypingEvent()
@@ -106,8 +127,14 @@ export class Store {
                 }
             },
             onPresenceChanged: (state: any, user: any) => {
-
                 this.presenceData[user.id] = state.current
+            },
+            onAddedToRoom: (room: SubscribedRoom) => {
+                console.log('added to room', room);
+                if (this.chatkitUser.id !== room.createdByUserId) {
+                    const mapedToUserJoinedRoom = mapSubscribedRoomToUserJoinedRoom(room)
+                    this.userJoinedRooms = [...this.userJoinedRooms!, mapedToUserJoinedRoom]
+                }
             }
         })
         .then((currentUser: any) => {
@@ -168,7 +195,6 @@ export class Store {
                     onUserStartedTyping: (user: RoomUser) => {
                         this.usersWhoAreTyping[id] =
                             this.usersWhoAreTyping[id] ? [...this.usersWhoAreTyping[id], user.name] : [user.name]
-
                     },
                     onUserStoppedTyping: (user: RoomUser) => {
                         if (this.usersWhoAreTyping[id]) {

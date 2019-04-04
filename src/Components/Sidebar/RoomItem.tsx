@@ -6,7 +6,7 @@ import DraftsIcon from '@material-ui/icons/Drafts'
 
 import { ListItem, ListItemText } from '@material-ui/core';
 import { withStyles, WithStyles } from '@material-ui/core/styles'
-import { SubscribedRoom, RoomUser, PresenceData } from '../../../store/types';
+import { SubscribedRoom, RoomUser, PresenceData, UserJoinedRoom } from '../../../store/types';
 
 const styles = (theme: any) => ({
     nestedListItem: {
@@ -43,22 +43,19 @@ const styles = (theme: any) => ({
 })
 
 interface Props extends WithStyles<typeof styles> {
-    item: SubscribedRoom | RoomUser
+    item: UserJoinedRoom | RoomUser
     showNotification: boolean
     selected: boolean
     presenceData?: PresenceData
+    presenceIdToCheck?: string
     onClick: (id: string) => void
-}
-
-function instanceOfRoomUser(object: any): object is RoomUser {
-    return object.presence !== undefined;
 }
 
 const RoomsListHeader: React.SFC<Props> = (props) => {
 
-    function isPresent (item: RoomUser) {
+    function isPresent (id: string) {
         if (props.presenceData) {
-            return props.presenceData[item.id] === 'online'
+            return props.presenceData[id] === 'online'
         }
     }
 
@@ -72,8 +69,8 @@ const RoomsListHeader: React.SFC<Props> = (props) => {
             }}
             onClick={() => props.onClick(props.item.id)}
         >
-            {instanceOfRoomUser(props.item) &&
-                <div className={cc([props.classes.presence, isPresent(props.item) && props.classes.selected])} />
+            {props.presenceIdToCheck &&
+                <div className={cc([props.classes.presence, isPresent(props.presenceIdToCheck) && props.classes.selected])} />
             }
             <ListItemText
                 secondary={props.item.name}

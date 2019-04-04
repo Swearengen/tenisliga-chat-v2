@@ -20,6 +20,7 @@ export interface SubscribedRoom {
     customData?: Object;
     userIds?: string[];
     users: RoomUser[]
+    createdByUserId?: string
 }
 
 export interface UserJoinedRoom {
@@ -27,6 +28,7 @@ export interface UserJoinedRoom {
     name: string;
     private: boolean;
     member_user_ids: string[];
+    customData?: any
 }
 
 export interface Message {
