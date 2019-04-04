@@ -25,6 +25,8 @@ export interface SubscribedRoom {
 export interface UserJoinedRoom {
     id: string;
     name: string;
+    private: boolean;
+    member_user_ids: string[];
 }
 
 export interface Message {

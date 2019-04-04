@@ -22,7 +22,8 @@ const CHATKIT_INSTANCE_LOCATOR = process.env.CHATKIT_INSTANCE_LOCATOR
 
 export class Store {
     @observable errorMessage?: string
-    @observable loading: boolean = true;
+    @observable messagesLoading: boolean = false;
+    @observable initialLoading: boolean = true;
     @observable chatkitUser: any = {}
     @observable usersWhoAreTyping: RoomDataCollection<string[]> = {}
     @observable subscribedRooms?: SubscribedRoom[]
@@ -33,12 +34,15 @@ export class Store {
     @observable sendMessagesCollection: RoomDataCollection<string> = {}
     @observable presenceData: PresenceData = {}
 
+    private generalRoomId?: string
+
     @action
     setUserJoinedRoom = (rooms: UserJoinedRoom[]) => {
         this.userJoinedRooms = rooms
         this.userJoinedRooms.forEach(room => {
             if (room.name === 'General') {
                 this.currentRoomId = room.id
+                this.generalRoomId = room.id
             }
         })
     }
@@ -52,8 +56,13 @@ export class Store {
 
 
     @action
-    changeCurrentRoomId = (id: string) => {
-        this.currentRoomId = id
+    changeRoom = (id: string) => {
+        const subscribedRoom = _.find(this.subscribedRooms, ['id', id])
+        if (subscribedRoom) {
+            this.currentRoomId = id
+        } else {
+            this.connectToRoom(id)
+        }
     }
 
     @action
@@ -77,8 +86,8 @@ export class Store {
     }
 
     @action
-    public connectUserRequest = (userId: string) => {
-        this.loading = true
+    connectUserRequest = (userId: string) => {
+        this.initialLoading = true
 
         let url = process.env.NODE_ENV === 'production' ? '/api/authenticate' : `${API_URL}/api/authenticate`
 
@@ -104,45 +113,82 @@ export class Store {
         .then((currentUser: any) => {
             this.chatkitUser = currentUser
 
-            this.userJoinedRooms!.forEach(room => {
-                this.chatkitUser.subscribeToRoom({
-                    roomId: room.id,
-                    messageLimit: 20,
-                    hooks: {
-                        onMessage: (message: Message) => {
-                            const roomMessages = this.messagesCollection[message.roomId]
-                            this.messagesCollection[message.roomId] = roomMessages ? [...roomMessages, message] : [message]
-                        },
-                        onUserStartedTyping: (user: RoomUser) => {
-                            this.usersWhoAreTyping[room.id] =
-                                this.usersWhoAreTyping[room.id] ? [...this.usersWhoAreTyping[room.id], user.name] : [user.name]
+            this.chatkitUser.subscribeToRoom({
+                roomId: this.generalRoomId,
+                messageLimit: 20,
+                hooks: {
+                    onMessage: (message: Message) => {
+                        const roomMessages = this.messagesCollection[message.roomId]
+                        this.messagesCollection[message.roomId] = roomMessages ? [...roomMessages, message] : [message]
+                    },
+                    onUserStartedTyping: (user: RoomUser) => {
+                        this.usersWhoAreTyping[this.generalRoomId!] =
+                            this.usersWhoAreTyping[this.generalRoomId!] ? [...this.usersWhoAreTyping[this.generalRoomId!], user.name] : [user.name]
 
-                        },
-                        onUserStoppedTyping: (user: RoomUser) => {
-                            if (this.usersWhoAreTyping[room.id]) {
-                                this.usersWhoAreTyping[room.id] = this.usersWhoAreTyping[room.id].filter(
-                                    username => username !== user.name
-                                )
-                            }
+                    },
+                    onUserStoppedTyping: (user: RoomUser) => {
+                        if (this.usersWhoAreTyping[this.generalRoomId!]) {
+                            this.usersWhoAreTyping[this.generalRoomId!] = this.usersWhoAreTyping[this.generalRoomId!].filter(
+                                username => username !== user.name
+                            )
                         }
                     }
-                })
-                .then((currentRoom: SubscribedRoom) => {
-                    this.loading = false
-                    this.subscribedRooms = this.subscribedRooms ? [...this.subscribedRooms, currentRoom] : [currentRoom]
-                })
-                .catch((err: any) => {
-                    console.log(err);
-                    this.loading = false
-                    this.errorMessage = err.info ? err.info.error_description : 'Server error'
-                })
-            });
+                }
+            })
+            .then((currentRoom: SubscribedRoom) => {
+                this.initialLoading = false
+                this.subscribedRooms = this.subscribedRooms ? [...this.subscribedRooms, currentRoom] : [currentRoom]
+            })
+            .catch((err: any) => {
+                console.log(err);
+                this.initialLoading = false
+                this.errorMessage = err.info ? err.info.error_description : 'Server error'
+            })
+            // });
         })
         .catch((error: any) => {
             console.error(error)
-            this.loading = false
+            this.initialLoading = false
             this.errorMessage = error.info ? error.info.error_description : 'Server error'
         })
+    }
+
+    @action
+    connectToRoom(id: string) {
+        this.messagesLoading = true
+        this.chatkitUser
+            .subscribeToRoom({
+                roomId: id,
+                messageLimit: 50,
+                hooks: {
+                    onMessage: (message: Message) => {
+                        const roomMessages = this.messagesCollection[message.roomId]
+                        this.messagesCollection[message.roomId] = roomMessages ? [...roomMessages, message] : [message]
+                    },
+                    onUserStartedTyping: (user: RoomUser) => {
+                        this.usersWhoAreTyping[id] =
+                            this.usersWhoAreTyping[id] ? [...this.usersWhoAreTyping[id], user.name] : [user.name]
+
+                    },
+                    onUserStoppedTyping: (user: RoomUser) => {
+                        if (this.usersWhoAreTyping[id]) {
+                            this.usersWhoAreTyping[id] = this.usersWhoAreTyping[id].filter(
+                                username => username !== user.name
+                            )
+                        }
+                    }
+                }
+            })
+            .then((currentRoom: SubscribedRoom) => {
+                this.messagesLoading = false
+                this.currentRoomId = currentRoom.id
+                this.subscribedRooms = this.subscribedRooms ? [...this.subscribedRooms, currentRoom] : [currentRoom]
+            })
+            .catch((err: any) => {
+                console.log(err);
+                this.messagesLoading = false
+                this.errorMessage = err.info ? err.info.error_description : 'Server error'
+            })
     }
 
     public sendUserTypingEvent = () => {
@@ -182,14 +228,14 @@ export class Store {
 
     @computed
     get privateRooms() {
-        return _.filter(this.subscribedRooms, 'isPrivate')
+        return _.filter(this.userJoinedRooms, 'private')
     }
 
     @computed
     get publicRooms() {
-        return _.chain(this.subscribedRooms)
-            .filter(['isPrivate', false])
-            .sortBy((room: SubscribedRoom) => room.name === 'General' ? 1 : 99)
+        return _.chain(this.userJoinedRooms)
+            .filter(['private', false])
+            .sortBy((room: UserJoinedRoom) => room.name === 'General' ? 1 : 99)
             .value()
     }
 
@@ -197,13 +243,13 @@ export class Store {
     get leagueRoom() {
         // todo: tu dohvatit usere koji su roomu lige.
         // dohvatit sobu po customData
-        return _.find(this.subscribedRooms, ['name', 'Room 1'])
+        return _.find(this.userJoinedRooms, ['name', 'Room 1'])
     }
 
     @computed
     get usersFromLeagueRoom(): any {
         if (this.leagueRoom) {
-            const userIds = _.difference(this.leagueRoom.userIds, [this.chatkitUser.id])
+            const userIds = _.difference(this.leagueRoom.member_user_ids, [this.chatkitUser.id])
 
             return _.filter(this.chatkitUser.userStore.users, _.flow(
                 _.identity,

@@ -13,7 +13,7 @@ import PersonIcon from '@material-ui/icons/Person';
 
 import { DRAWER_WIDTH } from '../Dashboard'
 import Search from './Search';
-import { SubscribedRoom, RoomDataCollection, PresenceData } from '../../../store/types';
+import { RoomDataCollection, PresenceData, UserJoinedRoom } from '../../../store/types';
 import RoomsListHeader from './RoomsListHeader';
 import RoomItem from './RoomItem';
 
@@ -52,12 +52,12 @@ export const styles = (theme: any) => createStyles({
 interface Props extends WithStyles<typeof styles> {
     open: boolean;
     currentRoomId: string
-    publicRooms: SubscribedRoom[]
+    publicRooms: UserJoinedRoom[]
     notificationsCollection: RoomDataCollection<boolean>
-    leagueRoom?: SubscribedRoom
+    leagueRoom?: UserJoinedRoom
     leagueUsers?: any
     presenceData: PresenceData
-    changeCurrentRoomId: (id: string) => void
+    changeRoom: (id: string) => void
     handleDrawerClose: () => void
 }
 
@@ -105,7 +105,7 @@ class Sidebar extends React.Component<Props> {
                             item={room}
                             selected={room.id === this.props.currentRoomId}
                             showNotification={this.props.notificationsCollection[room.id]}
-                            onClick={this.props.changeCurrentRoomId}
+                            onClick={this.props.changeRoom}
                         />
                     )}
                 </List>
