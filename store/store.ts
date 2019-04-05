@@ -130,12 +130,16 @@ export class Store {
                 this.presenceData[user.id] = state.current
             },
             onAddedToRoom: (room: SubscribedRoom) => {
-                console.log('added to room', room);
                 if (this.chatkitUser.id !== room.createdByUserId) {
                     const mapedToUserJoinedRoom = mapSubscribedRoomToUserJoinedRoom(room)
-                    this.userJoinedRooms = [...this.userJoinedRooms!, mapedToUserJoinedRoom]
+                    this.userJoinedRooms = [
+                        ...this.userJoinedRooms!,
+                        {...mapedToUserJoinedRoom,
+                            member_user_ids: [this.chatkitUser.id, room.createdByUserId] // iz nekog razloga rooom.userIds je prazno pa rucno postavljam
+                        }
+                    ]
                 }
-            }
+            },
         })
         .then((currentUser: any) => {
             this.chatkitUser = currentUser
