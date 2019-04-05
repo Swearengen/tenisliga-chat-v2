@@ -4,7 +4,7 @@ const Chatkit = require('@pusher/chatkit-client'); // todo: why import is not wo
 import * as _ from 'lodash'
 
 import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, RoomDataCollection, Cursor, CursorHook, PresenceData } from './types';
-import { mapSubscribedRoomToUserJoinedRoom, findPrivateRoom } from './utils';
+import { findPrivateRoom } from './utils';
 
 const isServer = !process.browser
 useStaticRendering(isServer)
@@ -12,14 +12,9 @@ useStaticRendering(isServer)
 const API_URL = process.env.API_URL
 const CHATKIT_INSTANCE_LOCATOR = process.env.CHATKIT_INSTANCE_LOCATOR
 
-// 1. provjerit sta se dogada kada currentUsera doda netko u privateRoom
-// 2. sredit imenovanje privatnih poruka
-// 3. provjerit notifikacije za privatne poruke
-
 export class Store {
     @observable errorMessage?: string
-    @observable messagesLoading: boolean = false;
-    @observable initialLoading: boolean = true;
+    @observable loading: boolean = true;
     @observable chatkitUser: any = {}
     @observable usersWhoAreTyping: RoomDataCollection<string[]> = {}
     @observable subscribedRooms?: SubscribedRoom[]
@@ -30,15 +25,12 @@ export class Store {
     @observable sendMessagesCollection: RoomDataCollection<string> = {}
     @observable presenceData: PresenceData = {}
 
-    private generalRoomId?: string
-
     @action
     setUserJoinedRoom = (rooms: UserJoinedRoom[]) => {
         this.userJoinedRooms = rooms
         this.userJoinedRooms.forEach(room => {
             if (room.name === 'General') {
                 this.currentRoomId = room.id
-                this.generalRoomId = room.id
             }
         })
     }
@@ -53,12 +45,7 @@ export class Store {
 
     @action
     changeRoom = (id: string) => {
-        const subscribedRoom = _.find(this.subscribedRooms, ['id', id])
-        if (subscribedRoom) {
-            this.currentRoomId = id
-        } else {
-            this.connectToRoom(id)
-        }
+        this.currentRoomId = id
     }
 
     @action
@@ -74,14 +61,10 @@ export class Store {
                 addUserIds: [user.id]
             })
             .then((room: SubscribedRoom) => {
-                const mapedToUserJoinedRoom = mapSubscribedRoomToUserJoinedRoom(room)
-                this.userJoinedRooms = [
-                    ...this.userJoinedRooms!,
-                    {...mapedToUserJoinedRoom,
-                        member_user_ids: [this.chatkitUser.id, user.id] // iz nekog razloga rooom.userIds je prazno pa rucno postavljam
-                    }
-                ]
                 this.connectToRoom(room.id)
+                .then(() => {
+                    this.currentRoomId = room.id
+                })
             })
         }
     }
@@ -108,7 +91,7 @@ export class Store {
 
     @action
     connectUserRequest = (userId: string) => {
-        this.initialLoading = true
+        this.loading = true
 
         let url = process.env.NODE_ENV === 'production' ? '/api/authenticate' : `${API_URL}/api/authenticate`
 
@@ -131,63 +114,58 @@ export class Store {
             },
             onAddedToRoom: (room: SubscribedRoom) => {
                 if (this.chatkitUser.id !== room.createdByUserId) {
-                    const mapedToUserJoinedRoom = mapSubscribedRoomToUserJoinedRoom(room)
-                    this.userJoinedRooms = [
-                        ...this.userJoinedRooms!,
-                        {...mapedToUserJoinedRoom,
-                            member_user_ids: [this.chatkitUser.id, room.createdByUserId] // iz nekog razloga rooom.userIds je prazno pa rucno postavljam
-                        }
-                    ]
+                    this.connectToRoom(room.id)
                 }
             },
         })
         .then((currentUser: any) => {
             this.chatkitUser = currentUser
 
-            this.chatkitUser.subscribeToRoom({
-                roomId: this.generalRoomId,
-                messageLimit: 20,
-                hooks: {
-                    onMessage: (message: Message) => {
-                        const roomMessages = this.messagesCollection[message.roomId]
-                        this.messagesCollection[message.roomId] = roomMessages ? [...roomMessages, message] : [message]
-                    },
-                    onUserStartedTyping: (user: RoomUser) => {
-                        this.usersWhoAreTyping[this.generalRoomId!] =
-                            this.usersWhoAreTyping[this.generalRoomId!] ? [...this.usersWhoAreTyping[this.generalRoomId!], user.name] : [user.name]
+            this.userJoinedRooms!.forEach(room => {
+                this.loading = true
+                this.chatkitUser.subscribeToRoom({
+                    roomId: room.id,
+                    messageLimit: 20,
+                    hooks: {
+                        onMessage: (message: Message) => {
+                            const roomMessages = this.messagesCollection[message.roomId]
+                            this.messagesCollection[message.roomId] = roomMessages ? [...roomMessages, message] : [message]
+                        },
+                        onUserStartedTyping: (user: RoomUser) => {
+                            this.usersWhoAreTyping[room.id] =
+                                this.usersWhoAreTyping[room.id] ? [...this.usersWhoAreTyping[room.id], user.name] : [user.name]
 
-                    },
-                    onUserStoppedTyping: (user: RoomUser) => {
-                        if (this.usersWhoAreTyping[this.generalRoomId!]) {
-                            this.usersWhoAreTyping[this.generalRoomId!] = this.usersWhoAreTyping[this.generalRoomId!].filter(
-                                username => username !== user.name
-                            )
+                        },
+                        onUserStoppedTyping: (user: RoomUser) => {
+                            if (this.usersWhoAreTyping[room.id]) {
+                                this.usersWhoAreTyping[room.id] = this.usersWhoAreTyping[room.id].filter(
+                                    username => username !== user.name
+                                )
+                            }
                         }
                     }
-                }
-            })
-            .then((currentRoom: SubscribedRoom) => {
-                this.initialLoading = false
-                this.subscribedRooms = this.subscribedRooms ? [...this.subscribedRooms, currentRoom] : [currentRoom]
-            })
-            .catch((err: any) => {
-                console.log(err);
-                this.initialLoading = false
-                this.errorMessage = err.info ? err.info.error_description : 'Server error'
-            })
-            // });
+                })
+                .then((currentRoom: SubscribedRoom) => {
+                    this.loading = false
+                    this.subscribedRooms = this.subscribedRooms ? [...this.subscribedRooms, currentRoom] : [currentRoom]
+                })
+                .catch((err: any) => {
+                    console.log(err);
+                    this.loading = false
+                    this.errorMessage = err.info ? err.info.error_description : 'Server error'
+                })
+            });
         })
         .catch((error: any) => {
             console.error(error)
-            this.initialLoading = false
+            this.loading = false
             this.errorMessage = error.info ? error.info.error_description : 'Server error'
         })
     }
 
     @action
     connectToRoom(id: string) {
-        this.messagesLoading = true
-        this.chatkitUser
+        return this.chatkitUser
             .subscribeToRoom({
                 roomId: id,
                 messageLimit: 50,
@@ -210,13 +188,10 @@ export class Store {
                 }
             })
             .then((currentRoom: SubscribedRoom) => {
-                this.messagesLoading = false
-                this.currentRoomId = currentRoom.id
                 this.subscribedRooms = this.subscribedRooms ? [...this.subscribedRooms, currentRoom] : [currentRoom]
             })
             .catch((err: any) => {
                 console.log(err);
-                this.messagesLoading = false
                 this.errorMessage = err.info ? err.info.error_description : 'Server error'
             })
     }
@@ -258,14 +233,14 @@ export class Store {
 
     @computed
     get privateRooms() {
-        return _.filter(this.userJoinedRooms, 'private')
+        return _.filter(this.subscribedRooms, 'isPrivate')
     }
 
     @computed
     get publicRooms() {
-        return _.chain(this.userJoinedRooms)
-            .filter(['private', false])
-            .sortBy((room: UserJoinedRoom) => room.name === 'General' ? 1 : 99)
+        return _.chain(this.subscribedRooms)
+            .filter(['isPrivate', false])
+            .sortBy((room: SubscribedRoom) => room.name === 'General' ? 1 : 99)
             .value()
     }
 
@@ -273,13 +248,13 @@ export class Store {
     get leagueRoom() {
         // todo: tu dohvatit usere koji su roomu lige.
         // dohvatit sobu po customData
-        return _.find(this.userJoinedRooms, ['name', 'Room 1'])
+        return _.find(this.subscribedRooms, ['name', 'Room 1'])
     }
 
     @computed
     get usersFromLeagueRoom(): any {
         if (this.leagueRoom) {
-            const userIds = _.difference(this.leagueRoom.member_user_ids, [this.chatkitUser.id])
+            const userIds = _.difference(this.leagueRoom.userIds, [this.chatkitUser.id])
 
             return _.filter(this.chatkitUser.userStore.users, _.flow(
                 _.identity,

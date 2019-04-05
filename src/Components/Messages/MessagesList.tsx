@@ -12,7 +12,6 @@ import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import grey from '@material-ui/core/colors/grey'
 
 import MessageItem from './MessageItem';
-import { Loader } from '../UtilComponents/Loader';
 
 const styles = (theme: any) => ({
     rootStyles: {
@@ -38,7 +37,6 @@ const styles = (theme: any) => ({
 });
 
 interface Props extends WithStyles<typeof styles> {
-    loading: boolean
     messages: Message[]
     lastMessageId?: string
     roomUsers: RoomUser[]
@@ -105,19 +103,15 @@ class MessagesList extends React.Component<Props, {}> {
     render () {
         return (
             <div className={this.props.classes.rootStyles} id="scroll-container">
-                {this.props.loading ? (
-                    <Loader />
-                ) : (
-                    <Grid container justify = "center">
-                        <Grid item xs={10}>
-                            <List classes={{
-                                root: this.props.classes.listStyle
-                            }}>
-                                {this.props.messages.map((message) => this.renderMessage(message))}
-                            </List>
-                        </Grid>
+                <Grid container justify = "center">
+                    <Grid item xs={10}>
+                        <List classes={{
+                            root: this.props.classes.listStyle
+                        }}>
+                            {this.props.messages.map((message) => this.renderMessage(message))}
+                        </List>
                     </Grid>
-                )}
+                </Grid>
 
                 {this.props.lastMessageId &&
                     <div

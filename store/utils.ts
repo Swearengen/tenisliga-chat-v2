@@ -20,12 +20,12 @@ export const mapSubscribedRoomToUserJoinedRoom = (room: SubscribedRoom): UserJoi
     return userJoinedProps
 }
 
-export const findPrivateRoom = (userForChat: RoomUser, currentUserId: string, privateRooms: UserJoinedRoom[]) => {
+export const findPrivateRoom = (userForChat: RoomUser, currentUserId: string, privateRooms: SubscribedRoom[]) => {
     return _.find(privateRooms, (room) => {
-        if (!room.private) {
+        if (!room.isPrivate) {
             return false
         }
-        const intersection = _.intersection(room.member_user_ids, [currentUserId, userForChat.id])
+        const intersection = _.intersection(room.userIds!, [currentUserId, userForChat.id])
         return intersection.length === 2
     })
 }

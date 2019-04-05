@@ -14,7 +14,7 @@ import PersonIcon from '@material-ui/icons/Person';
 
 import { DRAWER_WIDTH } from '../Dashboard'
 import Search from './Search';
-import { RoomDataCollection, PresenceData, UserJoinedRoom, RoomUser } from '../../../store/types';
+import { RoomDataCollection, PresenceData, SubscribedRoom, RoomUser } from '../../../store/types';
 import RoomsListHeader from './RoomsListHeader';
 import RoomItem from './RoomItem';
 
@@ -54,10 +54,10 @@ interface Props extends WithStyles<typeof styles> {
     open: boolean;
     currentRoomId: string
     userId: string
-    publicRooms: UserJoinedRoom[]
-    privateRooms: UserJoinedRoom[]
+    publicRooms: SubscribedRoom[]
+    privateRooms: SubscribedRoom[]
     notificationsCollection: RoomDataCollection<boolean>
-    leagueRoom?: UserJoinedRoom
+    leagueRoom?: SubscribedRoom
     leagueUsers?: any
     presenceData: PresenceData
     changeRoom: (id: string) => void
@@ -77,6 +77,7 @@ class Sidebar extends React.Component<Props> {
                 key={user.id}
                 item={user}
                 selected={false}
+                disableSelected={true}
                 showNotification={false}
                 onClick={(id: string) => this.leagueUserClicked(user)}
                 presenceData={this.props.presenceData}
@@ -86,8 +87,8 @@ class Sidebar extends React.Component<Props> {
     }
 
     renderPrivateMessages = () => {
-        const privateRooms = this.props.privateRooms.map((room: UserJoinedRoom) => {
-            const presenceIdToCheck = _.find(room.member_user_ids, (id: string) => id !== this.props.userId)
+        const privateRooms = this.props.privateRooms.map((room: SubscribedRoom) => {
+            const presenceIdToCheck = _.find(room.userIds, (id: string) => id !== this.props.userId)
             return (
                 <RoomItem
                     key={room.id}

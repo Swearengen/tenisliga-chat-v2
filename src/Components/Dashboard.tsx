@@ -86,7 +86,7 @@ class Dashboard extends React.Component<Props, State> {
 		const { classes } = this.props
 		const { store } = this.props
 
-		if (store.initialLoading) {
+		if (store.loading) {
 			return (
 				<Loader />
 			)
@@ -127,7 +127,6 @@ class Dashboard extends React.Component<Props, State> {
 						!_.isEmpty(store.currentRoom) &&
 						<div>
 							<MessagesList
-								loading={store.messagesLoading}
 								messages={store.messages!}
 								roomUsers={store.currentRoom!.users}
 								userId={this.props.userId}

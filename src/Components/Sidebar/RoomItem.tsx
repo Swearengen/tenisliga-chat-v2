@@ -6,7 +6,7 @@ import DraftsIcon from '@material-ui/icons/Drafts'
 
 import { ListItem, ListItemText } from '@material-ui/core';
 import { withStyles, WithStyles } from '@material-ui/core/styles'
-import { SubscribedRoom, RoomUser, PresenceData, UserJoinedRoom } from '../../../store/types';
+import { SubscribedRoom, RoomUser, PresenceData } from '../../../store/types';
 
 const styles = (theme: any) => ({
     nestedListItem: {
@@ -15,6 +15,12 @@ const styles = (theme: any) => ({
             color: '#3c3c3c',
             fontWeight: 900
         },
+        '&$disabled': {
+            background: 'none',
+            cursor: 'pointer',
+            pointerEvents: 'inherit' as 'inherit',
+            opacity: 1,
+        }
     },
     presence: {
         height: '10px',
@@ -27,6 +33,7 @@ const styles = (theme: any) => ({
         }
     },
     selected: {},
+    disabled: {},
     secondary: {
         color: 'inherit',
         fontWeight: 'inherit' as 'inherit'
@@ -43,9 +50,10 @@ const styles = (theme: any) => ({
 })
 
 interface Props extends WithStyles<typeof styles> {
-    item: UserJoinedRoom | RoomUser
+    item: SubscribedRoom | RoomUser
     showNotification: boolean
     selected: boolean
+    disableSelected?: boolean
     presenceData?: PresenceData
     presenceIdToCheck?: string
     onClick: (id: string) => void
@@ -63,9 +71,11 @@ const RoomsListHeader: React.SFC<Props> = (props) => {
         <ListItem
             button
             selected={props.selected}
+            disabled={props.disableSelected}
             classes={{
                 root: props.classes.nestedListItem,
-                selected: props.selected ? props.classes.selected : ''
+                selected: props.selected ? props.classes.selected : '',
+                disabled: props.disableSelected ? props.classes.disabled : ''
             }}
             onClick={() => props.onClick(props.item.id)}
         >
