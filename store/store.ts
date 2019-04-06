@@ -3,8 +3,8 @@ import { useStaticRendering } from 'mobx-react'
 const Chatkit = require('@pusher/chatkit-client'); // todo: why import is not working
 import * as _ from 'lodash'
 
-import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, RoomDataCollection, Cursor, CursorHook, PresenceData } from './types';
-import { findPrivateRoom } from './utils';
+import { UserJoinedRoom, SubscribedRoom, Message, RoomUser, RoomDataCollection, Cursor, CursorHook, PresenceData, PrivateSubscribedRoom } from './types';
+import { findPrivateRoom, privateRoomDisplayName } from './utils';
 
 const isServer = !process.browser
 useStaticRendering(isServer)
@@ -219,7 +219,16 @@ export class Store {
 
     @computed
     get currentRoom() {
-        return _.find(this.subscribedRooms, ['id', this.currentRoomId])
+        const room = _.find(this.subscribedRooms, ['id', this.currentRoomId])
+
+        if (room && room.isPrivate) {
+            return {
+                ...room,
+                displayName: privateRoomDisplayName(room.users, this.chatkitUser.id)
+            } as PrivateSubscribedRoom
+        }
+
+        return room
     }
 
     @computed
@@ -232,8 +241,16 @@ export class Store {
     }
 
     @computed
-    get privateRooms() {
-        return _.filter(this.subscribedRooms, 'isPrivate')
+    get privateRooms(): PrivateSubscribedRoom[] {
+        return _.chain(this.subscribedRooms)
+            .filter('isPrivate')
+            .map(room => {
+                return {
+                    ...room,
+                    displayName: privateRoomDisplayName(room.users, this.chatkitUser.id)
+                } as PrivateSubscribedRoom
+            })
+            .value()
     }
 
     @computed

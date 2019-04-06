@@ -11,3 +11,9 @@ export const findPrivateRoom = (userForChat: RoomUser, currentUserId: string, pr
         return intersection.length === 2
     })
 }
+
+export const privateRoomDisplayName = (users: RoomUser[], currentUserId: string) :string => {
+    const user = _.find(users, (user) => user.id !== currentUserId)
+
+    return user ? user.name : ''
+}

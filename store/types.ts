@@ -23,6 +23,10 @@ export interface SubscribedRoom {
     createdByUserId?: string
 }
 
+export interface PrivateSubscribedRoom extends SubscribedRoom {
+    displayName: string
+}
+
 export interface UserJoinedRoom {
     id: string;
     name: string;

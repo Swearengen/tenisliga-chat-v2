@@ -14,7 +14,7 @@ import PersonIcon from '@material-ui/icons/Person';
 
 import { DRAWER_WIDTH } from '../Dashboard'
 import Search from './Search';
-import { RoomDataCollection, PresenceData, SubscribedRoom, RoomUser } from '../../../store/types';
+import { RoomDataCollection, PresenceData, SubscribedRoom, RoomUser, PrivateSubscribedRoom } from '../../../store/types';
 import RoomsListHeader from './RoomsListHeader';
 import RoomItem from './RoomItem';
 
@@ -55,7 +55,7 @@ interface Props extends WithStyles<typeof styles> {
     currentRoomId: string
     userId: string
     publicRooms: SubscribedRoom[]
-    privateRooms: SubscribedRoom[]
+    privateRooms: PrivateSubscribedRoom[]
     notificationsCollection: RoomDataCollection<boolean>
     leagueRoom?: SubscribedRoom
     leagueUsers?: any

@@ -6,7 +6,7 @@ import DraftsIcon from '@material-ui/icons/Drafts'
 
 import { ListItem, ListItemText } from '@material-ui/core';
 import { withStyles, WithStyles } from '@material-ui/core/styles'
-import { SubscribedRoom, RoomUser, PresenceData } from '../../../store/types';
+import { SubscribedRoom, RoomUser, PresenceData, PrivateSubscribedRoom } from '../../../store/types';
 
 const styles = (theme: any) => ({
     nestedListItem: {
@@ -50,7 +50,7 @@ const styles = (theme: any) => ({
 })
 
 interface Props extends WithStyles<typeof styles> {
-    item: SubscribedRoom | RoomUser
+    item: PrivateSubscribedRoom | SubscribedRoom | RoomUser
     showNotification: boolean
     selected: boolean
     disableSelected?: boolean
@@ -59,12 +59,24 @@ interface Props extends WithStyles<typeof styles> {
     onClick: (id: string) => void
 }
 
+function isPrivateSubscribedRoom(item: PrivateSubscribedRoom | SubscribedRoom | RoomUser): item is PrivateSubscribedRoom {
+    return (item as PrivateSubscribedRoom).displayName !== undefined;
+}
+
 const RoomsListHeader: React.SFC<Props> = (props) => {
 
     function isPresent (id: string) {
         if (props.presenceData) {
             return props.presenceData[id] === 'online'
         }
+    }
+
+    function roomName(item: PrivateSubscribedRoom | SubscribedRoom | RoomUser) {
+        if (isPrivateSubscribedRoom(item)) {
+            return item.displayName
+        }
+
+        return item.name
     }
 
     return (
@@ -83,7 +95,7 @@ const RoomsListHeader: React.SFC<Props> = (props) => {
                 <div className={cc([props.classes.presence, isPresent(props.presenceIdToCheck) && props.classes.selected])} />
             }
             <ListItemText
-                secondary={props.item.name}
+                secondary={roomName(props.item)}
                 classes={{secondary: props.selected ? props.classes.secondary : ''}}
             />
             {props.showNotification &&

@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 
 import { DRAWER_WIDTH } from './Dashboard'
-import { SubscribedRoom } from '../../store/types';
+import { SubscribedRoom, PrivateSubscribedRoom } from '../../store/types';
 
 export const styles = (theme: any) => createStyles({
     appBar: {
@@ -45,11 +45,23 @@ export const styles = (theme: any) => createStyles({
 
 interface Props extends WithStyles<typeof styles> {
     open: boolean
-    currentRoom: SubscribedRoom
+    currentRoom: SubscribedRoom | PrivateSubscribedRoom
     handleDrawerOpen: () => void
 }
 
+function isPrivateSubscribedRoom(item: PrivateSubscribedRoom | SubscribedRoom): item is PrivateSubscribedRoom {
+    return (item as PrivateSubscribedRoom).displayName !== undefined;
+}
+
 class AppHeader extends React.Component<Props> {
+
+    roomName = (item: PrivateSubscribedRoom | SubscribedRoom) => {
+        if (isPrivateSubscribedRoom(item)) {
+            return item.displayName
+        }
+
+        return item.name
+    }
 
     render () {
         const { classes } = this.props
@@ -75,7 +87,7 @@ class AppHeader extends React.Component<Props> {
                         noWrap
                         className={classes.title}
                     >
-                        {this.props.currentRoom && this.props.currentRoom.name}
+                        {this.props.currentRoom && this.roomName(this.props.currentRoom)}
                     </Typography>
                     <div>
                         <img src="/static/logo.png" style={{height: '64px'}} />
