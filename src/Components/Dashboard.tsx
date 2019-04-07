@@ -139,7 +139,9 @@ class Dashboard extends React.Component<Props, State> {
 								userId={this.props.userId}
 								lastMessageId={store.getLastMessageId}
 								currentRoomId={store.currentRoomId!}
+								loadingOlder={store.loadingOlderMessages}
 								onSetCursor={store.setCursor}
+								loadOlder={store.loadOlderMessages}
                             />
 						</div>
 					}

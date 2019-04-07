@@ -15,6 +15,7 @@ const CHATKIT_INSTANCE_LOCATOR = process.env.CHATKIT_INSTANCE_LOCATOR
 export class Store {
     @observable errorMessage?: string
     @observable loading: boolean = true;
+    @observable loadingOlderMessages: boolean = false
     @observable chatkitUser: any = {}
     @observable usersWhoAreTyping: RoomDataCollection<string[]> = {}
     @observable subscribedRooms?: SubscribedRoom[]
@@ -24,6 +25,7 @@ export class Store {
     @observable cursorCollection: RoomDataCollection<number> = {}
     @observable sendMessagesCollection: RoomDataCollection<string> = {}
     @observable presenceData: PresenceData = {}
+    @observable loadedOldestMessagesCollection: RoomDataCollection<boolean> = {}
 
     @action
     setUserJoinedRoom = (rooms: UserJoinedRoom[]) => {
@@ -125,7 +127,7 @@ export class Store {
                 this.loading = true
                 this.chatkitUser.subscribeToRoom({
                     roomId: room.id,
-                    messageLimit: 20,
+                    messageLimit: 10,
                     hooks: {
                         onMessage: (message: Message) => {
                             const roomMessages = this.messagesCollection[message.roomId]
@@ -168,7 +170,7 @@ export class Store {
         return this.chatkitUser
             .subscribeToRoom({
                 roomId: id,
-                messageLimit: 50,
+                messageLimit: 10,
                 hooks: {
                     onMessage: (message: Message) => {
                         const roomMessages = this.messagesCollection[message.roomId]
@@ -194,6 +196,34 @@ export class Store {
                 console.log(err);
                 this.errorMessage = err.info ? err.info.error_description : 'Server error'
             })
+    }
+
+    @action
+    loadOlderMessages = (lastMessageId: number) => {
+        if (this.loadedOldestMessagesCollection[this.currentRoomId!]) {
+            return
+        }
+
+        this.loadingOlderMessages = true
+        this.chatkitUser.fetchMessages({
+            roomId: this.currentRoomId,
+            initialId: lastMessageId,
+            direction: 'older',
+            limit: 10,
+        })
+        .then((messages: Message[]) => {
+            this.loadingOlderMessages = false
+            if (messages.length > 0) {
+                const roomMessages = this.messagesCollection[this.currentRoomId!]
+                this.messagesCollection[this.currentRoomId!] = [...messages, ...roomMessages]
+            } else {
+                this.loadedOldestMessagesCollection[this.currentRoomId!] = true
+            }
+        })
+        .catch((err: any) => {
+            console.log(`Error fetching messages: ${err}`)
+            this.loadingOlderMessages = false
+        })
     }
 
     public sendUserTypingEvent = () => {

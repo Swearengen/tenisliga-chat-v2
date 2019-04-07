@@ -12,6 +12,7 @@ import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import grey from '@material-ui/core/colors/grey'
 
 import MessageItem from './MessageItem';
+import { Loader } from '../UtilComponents/Loader';
 
 const styles = (theme: any) => ({
     rootStyles: {
@@ -42,10 +43,13 @@ interface Props extends WithStyles<typeof styles> {
     roomUsers: RoomUser[]
     userId: string
     currentRoomId: string
+    loadingOlder: boolean
     onSetCursor: () => void
+    loadOlder: (oldestMessageId: number) => void
 }
 
 class MessagesList extends React.Component<Props, {}> {
+    messagesCont: any = React.createRef()
 
     componentDidMount() {
         if (this.props.lastMessageId) {
@@ -62,6 +66,12 @@ class MessagesList extends React.Component<Props, {}> {
 
         if (prevProps.currentRoomId !== this.props.currentRoomId) {
             this.props.onSetCursor()
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.messagesCont) {
+            this.messagesCont.removeEventListener('scroll', this.handleScroll);
         }
     }
 
@@ -100,9 +110,28 @@ class MessagesList extends React.Component<Props, {}> {
         </Element>
     )
 
+    messagesContDidMount = (node: any) => {
+        this.messagesCont = node
+        if (this.messagesCont) {
+            this.messagesCont.addEventListener("scroll", this.handleScroll)
+        }
+    }
+
+
+    handleScroll = _.debounce((event: any) => {
+        const { scrollTop } = event.srcElement
+        if (scrollTop === 0) {
+            this.props.loadOlder(this.props.messages[0].id)
+        }
+
+    }, 150);
+
     render () {
         return (
-            <div className={this.props.classes.rootStyles} id="scroll-container">
+            <div className={this.props.classes.rootStyles} id="scroll-container" ref={this.messagesContDidMount}>
+                {this.props.loadingOlder &&
+                    <Loader />
+                }
                 <Grid container justify = "center">
                     <Grid item xs={10}>
                         <List classes={{
