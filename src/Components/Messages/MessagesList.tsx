@@ -59,7 +59,7 @@ class MessagesList extends React.Component<Props, {}> {
     }
 
     componentDidUpdate(prevProps: Props) {
-        if (this.props.messages.length > prevProps.messages.length) {
+        if (this.props.lastMessageId !== prevProps.lastMessageId) {
             this.scrollToElement(this.props.lastMessageId!)
             this.props.onSetCursor()
         }
