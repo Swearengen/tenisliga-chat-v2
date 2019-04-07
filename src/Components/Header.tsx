@@ -12,6 +12,8 @@ import Typography from '@material-ui/core/Typography';
 import { DRAWER_WIDTH } from './Dashboard'
 import { SubscribedRoom, PrivateSubscribedRoom } from '../../store/types';
 
+import DraftsIcon from '@material-ui/icons/Drafts'
+
 export const styles = (theme: any) => createStyles({
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
@@ -41,11 +43,22 @@ export const styles = (theme: any) => createStyles({
     title: {
         flexGrow: 1,
     },
+    notificationIcon: {
+        fontSize: '20px',
+        color: 'white',
+        position: 'absolute',
+        top: '5px',
+        right: '0px',
+        padding: '4px',
+        background: theme.palette.error.main,
+        borderRadius: '50%'
+    }
 })
 
 interface Props extends WithStyles<typeof styles> {
     open: boolean
     currentRoom: SubscribedRoom | PrivateSubscribedRoom
+    shouldDisplayNotification: boolean,
     handleDrawerOpen: () => void
 }
 
@@ -76,6 +89,11 @@ const AppHeader: React.SFC<Props> = (props) => {
                     className={cc([props.classes.menuButton, props.open && props.classes.menuButtonHidden])}
                 >
                     <MenuIcon />
+                    {props.shouldDisplayNotification && !props.open &&
+                        <DraftsIcon fontSize="small" classes={{
+                            root: props.classes.notificationIcon
+                        }} />
+                    }
                 </IconButton>
                 <Typography
                     component="h1"

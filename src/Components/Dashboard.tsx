@@ -64,6 +64,12 @@ class Dashboard extends React.Component<Props, State> {
 	componentDidMount() {
         const { store, userId } = this.props
 		store.connectUser(userId)
+		if(window.innerWidth < 790) {
+			this.setState({
+				open: false
+			})
+		}
+
 	}
 
 	handleDrawerOpen = () => {
@@ -103,6 +109,7 @@ class Dashboard extends React.Component<Props, State> {
 
 				<AppHeader
 					open={this.state.open}
+					shouldDisplayNotification={store.shouldDisplayHeaderNotification}
 					handleDrawerOpen={this.handleDrawerOpen}
 					currentRoom={store.currentRoom!}
 				/>

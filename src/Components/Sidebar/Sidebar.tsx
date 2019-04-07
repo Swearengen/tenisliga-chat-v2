@@ -13,7 +13,7 @@ import PeopleIcon from '@material-ui/icons/People';
 import PersonIcon from '@material-ui/icons/Person';
 
 import { DRAWER_WIDTH } from '../Dashboard'
-import Search from './Search';
+// import Search from './Search';
 import { RoomDataCollection, PresenceData, SubscribedRoom, RoomUser, PrivateSubscribedRoom } from '../../../store/types';
 import RoomsListHeader from './RoomsListHeader';
 import RoomItem from './RoomItem';
@@ -22,7 +22,8 @@ export const styles = (theme: any) => createStyles({
     toolbar: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        // justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         padding: '0 8px',
         ...theme.mixins.toolbar,
     },
@@ -41,12 +42,12 @@ export const styles = (theme: any) => createStyles({
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.leavingScreen,
         }),
-            width: 0,
-            display: 'none',
-        [theme.breakpoints.up('sm')]: {
-                display: 'block',
-          width: theme.spacing.unit * 9,
-        },
+        width: 0,
+        display: 'none',
+        // [theme.breakpoints.up('sm')]: {
+        //     display: 'block',
+        //     width: theme.spacing.unit * 9,
+        // },
     }
 })
 
@@ -107,7 +108,7 @@ const Sidebar: React.SFC<Props> = (props) => {
             open={props.open}
         >
             <div className={props.classes.toolbar}>
-                <Search />
+                {/* <Search /> */}
                 <IconButton onClick={props.handleDrawerClose}>
                     <ChevronLeftIcon />
                 </IconButton>

@@ -298,6 +298,12 @@ export class Store {
     }
 
     @computed
+    get shouldDisplayHeaderNotification(): boolean {
+        const notification = _.find(this.notificationsCollection, (notification: any) => notification)
+        return !!notification
+    }
+
+    @computed
     get usersWhoAreTypingInRoom(): string[] {
         if (!_.isEmpty(this.usersWhoAreTyping[this.currentRoomId!])) {
             return this.usersWhoAreTyping[this.currentRoomId!]
