@@ -65,38 +65,33 @@ interface Props extends WithStyles<typeof styles> {
     handleDrawerClose: () => void
 }
 
-class Sidebar extends React.Component<Props> {
-
-    leagueUserClicked = (user: RoomUser) => {
-        this.props.leagueUserClicked(user)
-    }
-
-    renderLeagueUsers = () => {
-        return this.props.leagueUsers.map((user: any) =>
+const Sidebar: React.SFC<Props> = (props) => {
+    const renderLeagueUsers = () => {
+        return props.leagueUsers.map((user: any) =>
             <RoomItem
                 key={user.id}
                 item={user}
                 selected={false}
                 disableSelected={true}
                 showNotification={false}
-                onClick={(id: string) => this.leagueUserClicked(user)}
-                presenceData={this.props.presenceData}
+                onClick={(id: string) => props.leagueUserClicked(user)}
+                presenceData={props.presenceData}
                 presenceIdToCheck={user.id}
             />
         );
     }
 
-    renderPrivateMessages = () => {
-        const privateRooms = this.props.privateRooms.map((room: SubscribedRoom) => {
-            const presenceIdToCheck = _.find(room.userIds, (id: string) => id !== this.props.userId)
+    const renderPrivateMessages = () => {
+        const privateRooms = props.privateRooms.map((room: SubscribedRoom) => {
+            const presenceIdToCheck = _.find(room.userIds, (id: string) => id !== props.userId)
             return (
                 <RoomItem
                     key={room.id}
                     item={room}
-                    selected={room.id === this.props.currentRoomId}
-                    showNotification={this.props.notificationsCollection[room.id]}
-                    onClick={this.props.changeRoom}
-                    presenceData={this.props.presenceData}
+                    selected={room.id === props.currentRoomId}
+                    showNotification={props.notificationsCollection[room.id]}
+                    onClick={props.changeRoom}
+                    presenceData={props.presenceData}
                     presenceIdToCheck={presenceIdToCheck}
                 />
             )
@@ -105,56 +100,52 @@ class Sidebar extends React.Component<Props> {
         return privateRooms
     }
 
-    render () {
-        const { classes } = this.props
+    return (
+        <Drawer
+            variant="permanent"
+            classes={{ paper: cc([props.classes.drawerPaper, !props.open && props.classes.drawerPaperClose]) }}
+            open={props.open}
+        >
+            <div className={props.classes.toolbar}>
+                <Search />
+                <IconButton onClick={props.handleDrawerClose}>
+                    <ChevronLeftIcon />
+                </IconButton>
+            </div>
+            <Divider />
 
-        return (
-            <Drawer
-                variant="permanent"
-                classes={{ paper: cc([classes.drawerPaper, !this.props.open && classes.drawerPaperClose]) }}
-                open={this.props.open}
-            >
-                <div className={classes.toolbar}>
-                    <Search />
-                    <IconButton onClick={this.props.handleDrawerClose}>
-                        <ChevronLeftIcon />
-                    </IconButton>
-                </div>
-                <Divider />
-
+            <List>
+                <RoomsListHeader title="Rooms"><PeopleIcon/></RoomsListHeader>
+                {props.publicRooms.map(room =>
+                    <RoomItem
+                        key={room.id}
+                        item={room}
+                        selected={room.id === props.currentRoomId}
+                        showNotification={props.notificationsCollection[room.id]}
+                        onClick={props.changeRoom}
+                    />
+                )}
+            </List>
+            <Divider />
+            {props.leagueRoom &&
                 <List>
-                    <RoomsListHeader title="Rooms"><PeopleIcon/></RoomsListHeader>
-                    {this.props.publicRooms.map(room =>
-                        <RoomItem
-                            key={room.id}
-                            item={room}
-                            selected={room.id === this.props.currentRoomId}
-                            showNotification={this.props.notificationsCollection[room.id]}
-                            onClick={this.props.changeRoom}
-                        />
-                    )}
+                    <RoomsListHeader title={props.leagueRoom.name!}>
+                        <PersonIcon />
+                    </RoomsListHeader>
+                    {renderLeagueUsers()}
                 </List>
-                <Divider />
-                {this.props.leagueRoom &&
-                    <List>
-                        <RoomsListHeader title={this.props.leagueRoom.name!}>
-                            <PersonIcon />
-                        </RoomsListHeader>
-                        {this.renderLeagueUsers()}
-                    </List>
-                }
-                <Divider />
-                {this.props.privateRooms &&
-                    <List>
-                        <RoomsListHeader title="Private Messages">
-                            <PersonIcon />
-                        </RoomsListHeader>
-                        {this.renderPrivateMessages()}
-                    </List>
-                }
-            </Drawer>
-        )
-    }
+            }
+            <Divider />
+            {props.privateRooms &&
+                <List>
+                    <RoomsListHeader title="Private Messages">
+                        <PersonIcon />
+                    </RoomsListHeader>
+                    {renderPrivateMessages()}
+                </List>
+            }
+        </Drawer>
+    )
 }
 
 export default withStyles(styles)(Sidebar)

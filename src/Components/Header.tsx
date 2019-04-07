@@ -53,9 +53,9 @@ function isPrivateSubscribedRoom(item: PrivateSubscribedRoom | SubscribedRoom): 
     return (item as PrivateSubscribedRoom).displayName !== undefined;
 }
 
-class AppHeader extends React.Component<Props> {
+const AppHeader: React.SFC<Props> = (props) => {
 
-    roomName = (item: PrivateSubscribedRoom | SubscribedRoom) => {
+    function roomName(item: PrivateSubscribedRoom | SubscribedRoom) {
         if (isPrivateSubscribedRoom(item)) {
             return item.displayName
         }
@@ -63,39 +63,36 @@ class AppHeader extends React.Component<Props> {
         return item.name
     }
 
-    render () {
-        const { classes } = this.props
+    return (
+        <AppBar
+            position="absolute"
+            className={cc([props.classes.appBar, props.open && props.classes.appBarShift])}
+        >
+            <Toolbar disableGutters={!props.open} className={props.classes.toolbar}>
+                <IconButton
+                    color="inherit"
+                    aria-label="Open drawer"
+                    onClick={props.handleDrawerOpen}
+                    className={cc([props.classes.menuButton, props.open && props.classes.menuButtonHidden])}
+                >
+                    <MenuIcon />
+                </IconButton>
+                <Typography
+                    component="h1"
+                    variant="h6"
+                    color="inherit"
+                    noWrap
+                    className={props.classes.title}
+                >
+                    {props.currentRoom && roomName(props.currentRoom)}
+                </Typography>
+                <div>
+                    <img src="/static/logo.png" style={{height: '64px'}} />
+                </div>
+            </Toolbar>
+        </AppBar>
+    )
 
-        return (
-            <AppBar
-                position="absolute"
-                className={cc([classes.appBar, this.props.open && classes.appBarShift])}
-            >
-                <Toolbar disableGutters={!this.props.open} className={classes.toolbar}>
-                    <IconButton
-                        color="inherit"
-                        aria-label="Open drawer"
-                        onClick={this.props.handleDrawerOpen}
-                        className={cc([classes.menuButton, this.props.open && classes.menuButtonHidden])}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography
-                        component="h1"
-                        variant="h6"
-                        color="inherit"
-                        noWrap
-                        className={classes.title}
-                    >
-                        {this.props.currentRoom && this.roomName(this.props.currentRoom)}
-                    </Typography>
-                    <div>
-                        <img src="/static/logo.png" style={{height: '64px'}} />
-                    </div>
-                </Toolbar>
-            </AppBar>
-        )
-    }
 }
 
 export default withStyles(styles)(AppHeader)

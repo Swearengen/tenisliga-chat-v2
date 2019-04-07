@@ -18,7 +18,6 @@ interface Props extends WithStyles<typeof styles> {
 
 
 const RoomsListHeader: React.SFC<Props> = (props) => {
-
     return (
         <ListItem button disabled classes={{disabled: props.classes.disabled}}>
             <ListItemIcon>

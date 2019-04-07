@@ -20,6 +20,9 @@ const styles = (theme: any) => ({
             cursor: 'pointer',
             pointerEvents: 'inherit' as 'inherit',
             opacity: 1,
+            '&:hover': {
+                background: 'rgba(0, 0, 0, 0.08)'
+            }
         }
     },
     presence: {
