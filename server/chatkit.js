@@ -37,5 +37,9 @@ module.exports = {
 
     authenticate: async function (userId) {
         return await this.instance.authenticate({userId})
+    },
+
+    createUser: async function({name, id, avatarURL}) {
+        return await this.instance.createUser({id, name, avatarURL})
     }
 }

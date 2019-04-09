@@ -27,8 +27,6 @@ router.get('/', async (req, res) => {
 
 					nextApp.app.render(req, res, '/', {...req.query, userRooms})
 				} catch (error) {
-					console.log(error, 'error');
-
 					nextApp.app.render(req, res, '/error', {
 						errorMessage: error.error_description || 'Server Error'
 					})

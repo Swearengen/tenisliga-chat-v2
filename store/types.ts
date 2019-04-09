@@ -6,7 +6,7 @@ export interface CurrentUser {
 export interface RoomUser {
     id: string;
     name: string;
-    avatarUrl?: string;
+    avatarURL?: string;
 }
 
 export interface PresenceData {

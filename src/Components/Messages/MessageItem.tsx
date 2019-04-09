@@ -6,6 +6,7 @@ import { Message, RoomUser } from '../../../store/types';
 import { ListItem, ListItemText, ListItemAvatar, Avatar } from '@material-ui/core';
 import { withStyles, WithStyles } from '@material-ui/core/styles'
 import teal from '@material-ui/core/colors/teal';
+import NotInterested from '@material-ui/icons/NotInterested';
 
 import { formatMessageDate } from '../../utils'
 
@@ -32,13 +33,12 @@ interface Props extends WithStyles<typeof styles> {
 
 const MessageItem: React.SFC<Props> = (props) => {
 
-    function getSenderName (senderId: string) {
-        let sender = _.find(props.roomUsers, {id: senderId}) as RoomUser
-        return sender ? sender.name : ''
+    const getSender = (senderId: string) => {
+        return _.find(props.roomUsers, {id: senderId}) as RoomUser
     }
 
-    function renderOwnMessages (message: Message) {
-        if (!message.text) {
+    const renderOwnMessages = () => {
+        if (!props.message.text) {
             return <div></div>
         }
         return (
@@ -46,12 +46,12 @@ const MessageItem: React.SFC<Props> = (props) => {
                 <ListItemText style={{flex: '0 0 auto'}}
                     primary={
                         <Typography component="div" variant="caption">
-                            {formatMessageDate(message.createdAt)}
+                            {formatMessageDate(props.message.createdAt)}
                         </Typography>
                     }
                     secondary={
                         <Typography variant="body2" className={cc([props.classes.messageText, props.classes.own])}>
-                            {message.text}
+                            {props.message.text}
                         </Typography>
                     }
                 />
@@ -59,25 +59,28 @@ const MessageItem: React.SFC<Props> = (props) => {
         )
     }
 
-    function renderOtherUserMessage (message: Message) {
-        if (!message.text) {
+    const sender = getSender(props.message.senderId)
+
+    const renderOtherUserMessage = () => {
+        if (!props.message.text) {
             return <div></div>
         }
+
 
         return (
             <ListItem alignItems="flex-start">
                 <ListItemAvatar>
-                    <Avatar alt="Remy Sharp" src='/static/avatarPlaceholder.png' />
+                    <Avatar alt="Remy Sharp" src={sender.avatarURL || '/static/avatarPlaceholder.png'} />
                 </ListItemAvatar>
                 <ListItemText style={{flex: '0 0 auto'}}
                     primary={
                         <Typography component="div" variant="caption">
-                            <strong>{getSenderName(message.senderId)}</strong>: {formatMessageDate(message.createdAt)}
+                            <strong>{sender.name || ''}</strong>: {formatMessageDate(props.message.createdAt)}
                         </Typography>
                     }
                     secondary={
                         <Typography variant="body2" className={props.classes.messageText}>
-                            {message.text}
+                            {props.message.text}
                         </Typography>
                     }
                 />
@@ -85,10 +88,30 @@ const MessageItem: React.SFC<Props> = (props) => {
         )
     }
 
-    if (props.message.senderId === props.userId) {
-        return renderOwnMessages(props.message)
+    const renderNoUserMessage = () => (
+        <ListItem alignItems="flex-start">
+            <NotInterested />
+            <ListItemText style={{flex: '0 0 auto'}}
+                primary={
+                    <Typography component="div" variant="caption">
+                        <strong>User deleted</strong>
+                    </Typography>
+                }
+                secondary={
+                    <Typography variant="body2" className={props.classes.messageText}>
+                        {props.message.text}
+                    </Typography>
+                }
+            />
+        </ListItem>
+    )
+
+    if (!sender) {
+        return renderNoUserMessage()
+    } else if (props.message.senderId === props.userId) {
+        return renderOwnMessages()
     } else {
-        return renderOtherUserMessage(props.message)
+        return renderOtherUserMessage()
     }
 }
 

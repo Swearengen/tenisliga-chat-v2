@@ -22,6 +22,13 @@ functions:
           path: api/authenticate
           method: post
 
+  chatkitCreateUser:
+    handler: serverless/chatkitRoutes.createUser
+    events:
+      - http:
+          path: api/createUser
+          method: post
+
 plugins:
   - serverless-apigw-binary
 

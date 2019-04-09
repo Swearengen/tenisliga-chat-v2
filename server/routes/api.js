@@ -13,4 +13,23 @@ router.post('/authenticate', async (req, res) => {
 	res.status(authData.status).send(authData.body)
 })
 
+router.post('/createUser', async (req, res) => {
+	const {name, id, avatarURL} = req.body
+	await chatkit.createUser({
+        name,
+        id,
+        avatarURL
+	})
+	.then((user) => {
+		return chatkit.addUserToGeneralRoom(user.id)
+	})
+	.then(() => {
+		res.status(200).send("success")
+	})
+	.catch((e) => {
+		res.status(500).send(e)
+	})
+
+})
+
 module.exports = router

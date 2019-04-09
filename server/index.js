@@ -17,7 +17,7 @@ app.prepare().then(() => {
         server.use('/_next', express.static(path.join(__dirname, '.next')))
         server.use('/static', express.static('static'))
     }
-    // server.use(bodyParser.json())
+    server.use(bodyParser.json())
     server.use('/', applicationRoute)
 
     if (dev) {
