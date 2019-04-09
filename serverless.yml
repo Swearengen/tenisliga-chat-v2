@@ -16,17 +16,24 @@ functions:
       - http: ANY /{proxy+}
 
   chatkitAuth:
-    handler: serverless/chatkitRoutes.authenticate
+    handler: serverless/chatkitAuth.authenticate
     events:
       - http:
           path: api/authenticate
           method: post
 
   chatkitCreateUser:
-    handler: serverless/chatkitRoutes.createUser
+    handler: serverless/chatkitUsers.createUser
     events:
       - http:
           path: api/createUser
+          method: post
+
+  chatkitDeleteUser:
+    handler: serverless/chatkitUsers.deleteUser
+    events:
+      - http:
+          path: api/deleteUser
           method: post
 
 plugins:

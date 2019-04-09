@@ -11,11 +11,12 @@ module.exports = {
         key: process.env.CHATKIT_INSTANCE_KEY,
     }),
 
-    createUser: async function({userName, userId}) {
-        return await this.instance.createUser({
-            id: userId,
-            name: userName,
-        })
+    createUser: async function({name, id, avatarURL}) {
+        return await this.instance.createUser({id, name, avatarURL})
+    },
+
+    deleteUser: async function(userId) {
+        return await this.instance.deleteUser({userId})
     },
 
     getUserRooms: async function(userId) {
@@ -39,7 +40,4 @@ module.exports = {
         return await this.instance.authenticate({userId})
     },
 
-    createUser: async function({name, id, avatarURL}) {
-        return await this.instance.createUser({id, name, avatarURL})
-    }
 }

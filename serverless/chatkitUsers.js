@@ -1,14 +1,4 @@
-const querystring = require('querystring');
 const chatkit = require('../server/chatkit')
-
-module.exports.authenticate = async (event, context, callback) => {
-    const authData = await chatkit.authenticate(event.queryStringParameters.user_id)
-
-    callback(null, {
-        statusCode: authData.status,
-        body: JSON.stringify(authData.body),
-    })
-}
 
 module.exports.createUser = async (event, context) => {
     const data = new Buffer(event.body, 'base64')
@@ -23,27 +13,43 @@ module.exports.createUser = async (event, context) => {
         return chatkit.addUserToGeneralRoom(user.id)
     })
     .then(() => {
-        const response = {
+        return {
             statusCode: 200,
             body: "success"
         }
-
-        return response
     })
     .catch((e) => {
-        const response = {
+        return {
             statusCode: 500,
             body: e
         }
-
-        return response
     })
 
+}
+
+module.exports.deleteUser = async (event, context) => {
+    const data = new Buffer(event.body, 'base64')
+    let json = JSON.parse(data.toString('ascii'))
+
+    return await chatkit.deleteUser(json.id)
+    .then(() => {
+        return {
+            statusCode: 200,
+            body: "success"
+        }
+    })
+    .catch((e) => {
+        return {
+            statusCode: 500,
+            body: e
+        }
+    })
 }
 
 // trebat ce dodat metode za:
 
 // 2. kreiranje usera u batchu
+    // 2. a. dodavanje svih usera u general Sobu
 // 3. delete jednog usera
 // 4. dodavanje soba
 // 5. brisanje soba
