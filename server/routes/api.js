@@ -21,7 +21,7 @@ router.post('/createUser', async (req, res) => {
         avatarURL
 	})
 	.then((user) => {
-		return chatkit.addUserToGeneralRoom(user.id)
+		return chatkit.addUsersToGeneralRoom([user.id])
 	})
 	.then(() => {
 		res.status(200).send("success")

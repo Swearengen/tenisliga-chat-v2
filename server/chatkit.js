@@ -15,6 +15,10 @@ module.exports = {
         return await this.instance.createUser({id, name, avatarURL})
     },
 
+    createUsers: async function(users) {
+        return await this.instance.createUsers({users})
+    },
+
     deleteUser: async function(userId) {
         return await this.instance.deleteUser({userId})
     },
@@ -29,10 +33,10 @@ module.exports = {
             .then((res) => res)
     },
 
-    addUserToGeneralRoom: async function(userId) {
+    addUsersToGeneralRoom: async function(userIds) {
         return await this.instance.addUsersToRoom({
             roomId: process.env.GENERAL_ROOM_ID,
-            userIds: [userId]
+            userIds
         })
     },
 

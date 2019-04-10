@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 					// =============================================================
 					// new user
 					const newUser = await chatkit.createUser(req.query)
-					await chatkit.addUserToGeneralRoom(userId)
+					await chatkit.addUsersToGeneralRoom([userId])
 					const userRooms = await chatkit.getUserRooms(userId)
 
 					nextApp.app.render(req, res, '/', {...req.query, userRooms})

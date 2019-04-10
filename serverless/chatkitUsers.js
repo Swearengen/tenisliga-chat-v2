@@ -10,7 +10,7 @@ module.exports.createUser = async (event, context) => {
         avatarURL: json.avatarURL
     })
     .then((user) => {
-        return chatkit.addUserToGeneralRoom(user.id)
+        return chatkit.addUsersToGeneralRoom([user.id])
     })
     .then(() => {
         return {
@@ -46,11 +46,32 @@ module.exports.deleteUser = async (event, context) => {
     })
 }
 
-// trebat ce dodat metode za:
+module.exports.bulkCreateUsers = async (event, context) => {
+    const data = new Buffer(event.body, 'base64')
+    let json = JSON.parse(data.toString('ascii'))
 
-// 2. kreiranje usera u batchu
-    // 2. a. dodavanje svih usera u general Sobu
-// 3. delete jednog usera
+    return await chatkit.createUsers(json)
+    .then((users) => {
+        console.log(users, 'users');
+        const userIds = users.map(user => user.id)
+        console.log(userIds, 'userIds');
+        return chatkit.addUsersToGeneralRoom(userIds)
+    })
+    .then(() => {
+        return {
+            statusCode: 200,
+            body: "success"
+        }
+    })
+    .catch((e) => {
+        return {
+            statusCode: 500,
+            body: e
+        }
+    })
+}
+
+// trebat ce dodat metode za:
 // 4. dodavanje soba
 // 5. brisanje soba
     // tu ce trebat dohvatit sve sobe

@@ -29,6 +29,13 @@ functions:
           path: api/createUser
           method: post
 
+  chatkitCreateUsers:
+    handler: serverless/chatkitUsers.bulkCreateUsers
+    events:
+      - http:
+          path: api/bulkCreateUsers
+          method: post
+
   chatkitDeleteUser:
     handler: serverless/chatkitUsers.deleteUser
     events:
