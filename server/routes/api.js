@@ -34,12 +34,10 @@ router.post('/createUser', async (req, res) => {
 
 router.post('/createLeagueRooms', async (req, res) => {
 	const data = req.body
-	console.log(data, 'data')
 
 	if(data.length > 0) {
 		try {
 			data.forEach(room => {
-				console.log(room, 'room');
 				chatkit.createRoom(room)
 			})
 			res.status(200).send("success")
@@ -49,7 +47,27 @@ router.post('/createLeagueRooms', async (req, res) => {
 	} else {
 		return res.status(500).send("error")
 	}
+})
 
+router.post('/deleteLeagueRooms', async (req, res) => {
+	const rooms = await chatkit.getPublicRooms()
+
+	if (rooms.length > 0) {
+		try {
+			rooms.forEach(room => {
+				if (room.custom_data && room.custom_data.leagueRoom) {
+					console.log(room);
+
+					chatkit.deleteRoom(room.id)
+				}
+			})
+			res.status(200).send("success")
+		} catch (e) {
+			return res.status(500).send(e)
+		}
+	}
+
+	res.status(200).send("no rooms to delete")
 })
 
 module.exports = router

@@ -32,6 +32,15 @@ module.exports = {
             .then((res) => res)
     },
 
+    getPublicRooms: async function() {
+        return await this.instance.getRooms({})
+            .then((res) => res)
+    },
+
+    deleteRoom: async function(id) {
+        return await this.instance.deleteRoom({id})
+    },
+
     getReadCursorsForUser: async function(userId) {
         return await this.instance.getReadCursorsForUser({userId})
             .then((res) => res)
