@@ -1,8 +1,8 @@
 const chatkit = require('../server/chatkit')
+const utils = require('./utils')
 
 module.exports.createUser = async (event, context) => {
-    const data = new Buffer(event.body, 'base64')
-    let json = JSON.parse(data.toString('ascii'))
+    let json = utils.getJsonParam(event.body)
 
     return await chatkit.createUser({
         name: json.name,
@@ -28,8 +28,7 @@ module.exports.createUser = async (event, context) => {
 }
 
 module.exports.deleteUser = async (event, context) => {
-    const data = new Buffer(event.body, 'base64')
-    let json = JSON.parse(data.toString('ascii'))
+    let json = utils.getJsonParam(event.body)
 
     return await chatkit.deleteUser(json.id)
     .then(() => {
@@ -47,8 +46,7 @@ module.exports.deleteUser = async (event, context) => {
 }
 
 module.exports.bulkCreateUsers = async (event, context) => {
-    const data = new Buffer(event.body, 'base64')
-    let json = JSON.parse(data.toString('ascii'))
+    let json = utils.getJsonParam(event.body)
 
     return await chatkit.createUsers(json)
         .then((users) => {

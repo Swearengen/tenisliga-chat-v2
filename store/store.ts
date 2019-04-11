@@ -254,6 +254,7 @@ export class Store {
         if (room && room.isPrivate) {
             return {
                 ...room,
+                users: room.users,
                 displayName: privateRoomDisplayName(room.users, this.chatkitUser.id)
             } as PrivateSubscribedRoom
         }
