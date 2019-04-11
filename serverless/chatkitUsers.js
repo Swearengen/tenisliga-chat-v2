@@ -51,22 +51,20 @@ module.exports.bulkCreateUsers = async (event, context) => {
     let json = JSON.parse(data.toString('ascii'))
 
     return await chatkit.createUsers(json)
-    .then((users) => {
-        console.log(users, 'users');
-        const userIds = users.map(user => user.id)
-        console.log(userIds, 'userIds');
-        return chatkit.addUsersToGeneralRoom(userIds)
-    })
-    .then(() => {
-        return {
-            statusCode: 200,
-            body: "success"
-        }
-    })
-    .catch((e) => {
-        return {
-            statusCode: 500,
-            body: e
-        }
-    })
+        .then((users) => {
+            const userIds = users.map(user => user.id)
+            return chatkit.addUsersToGeneralRoom(userIds)
+        })
+        .then(() => {
+            return {
+                statusCode: 200,
+                body: "success"
+            }
+        })
+        .catch((e) => {
+            return {
+                statusCode: 500,
+                body: e
+            }
+        })
 }

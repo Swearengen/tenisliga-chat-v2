@@ -56,8 +56,6 @@ router.post('/deleteLeagueRooms', async (req, res) => {
 		try {
 			rooms.forEach(room => {
 				if (room.custom_data && room.custom_data.leagueRoom) {
-					console.log(room);
-
 					chatkit.deleteRoom(room.id)
 				}
 			})

@@ -43,6 +43,20 @@ functions:
           path: api/deleteUser
           method: post
 
+  chatkitCreateLeagueRooms:
+    handler: serverless/chatkitRooms.createLeagueRooms
+    events:
+      - http:
+          path: api/createLeagueRooms
+          method: post
+
+  chatkitDeleteLeagueRooms:
+    handler: serverless/chatkitRooms.deleteLeagueRooms
+    events:
+      - http:
+          path: api/deleteLeagueRooms
+          method: post
+
 plugins:
   - serverless-apigw-binary
 
