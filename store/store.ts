@@ -292,10 +292,8 @@ export class Store {
     }
 
     @computed
-    get leagueRoom() {
-        // todo: tu dohvatit usere koji su roomu lige.
-        // dohvatit sobu po customData
-        return _.find(this.subscribedRooms, ['name', 'Room 1'])
+    get leagueRoom(): SubscribedRoom | undefined {
+        return _.find(this.subscribedRooms, (room) => room.customData && room.customData.leagueRoom) as SubscribedRoom
     }
 
     @computed

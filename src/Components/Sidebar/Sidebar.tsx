@@ -130,7 +130,7 @@ const Sidebar: React.SFC<Props> = (props) => {
             <Divider />
             {props.leagueRoom &&
                 <List>
-                    <RoomsListHeader title={props.leagueRoom.name!}>
+                    <RoomsListHeader title={`${props.leagueRoom.name!} oponents`}>
                         <PersonIcon />
                     </RoomsListHeader>
                     {renderLeagueUsers()}

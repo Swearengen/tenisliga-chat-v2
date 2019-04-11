@@ -17,7 +17,7 @@ export interface SubscribedRoom {
     id: string;
     name?: string;
     isPrivate: boolean;
-    customData?: Object;
+    customData?: any;
     userIds?: string[];
     users: RoomUser[]
     createdByUserId?: string

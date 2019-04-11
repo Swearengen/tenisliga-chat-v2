@@ -23,6 +23,10 @@ module.exports = {
         return await this.instance.deleteUser({userId})
     },
 
+    createRoom: async function(room) {
+        return await this.instance.createRoom(room)
+    },
+
     getUserRooms: async function(userId) {
         return await this.instance.getUserRooms({userId})
             .then((res) => res)

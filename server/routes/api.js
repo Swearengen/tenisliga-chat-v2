@@ -32,4 +32,24 @@ router.post('/createUser', async (req, res) => {
 
 })
 
+router.post('/createLeagueRooms', async (req, res) => {
+	const data = req.body
+	console.log(data, 'data')
+
+	if(data.length > 0) {
+		try {
+			data.forEach(room => {
+				console.log(room, 'room');
+				chatkit.createRoom(room)
+			})
+			res.status(200).send("success")
+		} catch (e) {
+			return res.status(500).send(e)
+		}
+	} else {
+		return res.status(500).send("error")
+	}
+
+})
+
 module.exports = router
